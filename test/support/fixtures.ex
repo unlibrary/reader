@@ -8,4 +8,8 @@ defmodule UnLib.Fixtures do
   def valid_password do
     "somepassword"
   end
+
+  def valid_feed_url do
+    "https://stackoverflow.blog/newsletter/feed"
+  end
 end

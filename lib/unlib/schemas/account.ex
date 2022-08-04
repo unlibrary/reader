@@ -22,7 +22,7 @@ defmodule UnLib.Account do
   def changeset(changeset, params \\ %{}) do
     changeset
     |> cast(params, [:username, :password, :email])
-    |> validate_required([:username, :password])
+    |> maybe_validate_required([:username, :password], params)
     |> validate_email()
     |> downcase_username()
     |> validate_username()
@@ -30,6 +30,14 @@ defmodule UnLib.Account do
     |> hash_password()
     |> unique_constraint([:username, :email])
     |> unique_constraint([:email, :username])
+  end
+
+  defp maybe_validate_required(changeset, fields, opts) do
+    if opts[:validate_required] do
+      validate_required(changeset, fields)
+    else
+      changeset
+    end
   end
 
   defp downcase_username(changeset) do
