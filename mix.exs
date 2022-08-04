@@ -1,6 +1,8 @@
 defmodule UnLib.MixProject do
   use Mix.Project
 
+  @mix_env Mix.env()
+
   def project do
     [
       name: "Unlibrary",
@@ -8,14 +10,17 @@ defmodule UnLib.MixProject do
       app: :unlib,
       version: "0.1.0",
       elixir: "~> 1.13",
-      start_permanent: Mix.env() == :prod,
-      deps: deps()
+      start_permanent: @mix_env == :prod,
+      elixirc_paths: elixirc_paths(Mix.env()),
+      deps: deps(),
+      aliases: aliases()
     ]
   end
 
   def application do
     [
-      extra_applications: [:logger]
+      extra_applications: [:logger],
+      mod: {UnLib.Application, []}
     ]
   end
 
@@ -23,6 +28,7 @@ defmodule UnLib.MixProject do
     [
       {:ecto_sql, "~> 3.0"},
       {:postgrex, ">= 0.0.0"},
+      {:typed_ecto_schema, "~> 0.4.1", runtime: false},
       {:cloak, "1.1.1"},
       {:cloak_ecto, "~> 1.2"},
       {:jason, "~> 1.2"},
@@ -32,4 +38,17 @@ defmodule UnLib.MixProject do
       {:the_big_username_blacklist, "~> 0.1.2"}
     ]
   end
+
+  defp aliases do
+    [
+      setup: ["deps.get", "ecto.setup"],
+      translate: ["gettext.extract", "gettext.merge priv/gettext --no-fuzzy"],
+      "ecto.setup": ["ecto.create", "ecto.migrate"],
+      "ecto.reset": ["ecto.drop", "ecto.setup"],
+      test: ["ecto.create --quiet", "ecto.migrate --quiet", "test --exclude broken"]
+    ]
+  end
+
+  defp elixirc_paths(:test), do: ["lib", "test/support"]
+  defp elixirc_paths(_), do: ["lib"]
 end
