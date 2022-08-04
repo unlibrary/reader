@@ -32,6 +32,7 @@ defmodule UnLib.MixProject do
       {:cloak, "1.1.1"},
       {:cloak_ecto, "~> 1.2"},
       {:jason, "~> 1.2"},
+      {:finch, "~> 0.13"},
       {:bcrypt_elixir, "~> 2.3.0"},
       {:fast_rss, github: "RobinBoers/fast_rss"},
       {:ex_doc, "~> 0.24", only: :dev, runtime: false},

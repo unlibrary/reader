@@ -1,4 +1,15 @@
 defmodule UnLib.Source do
+  @moduledoc """
+  Ecto Schema representing a source.
+
+  Unlibrary currently supports these types of feeds:
+
+  - RSS
+  - Atom
+  - Microformats2
+
+  But support for certain federated/indieweb protocols like microsub is planned and on the roadmap for 2022.
+  """
   use UnLib.Schema
   import Ecto.Changeset
 

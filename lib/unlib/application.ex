@@ -9,7 +9,8 @@ defmodule UnLib.Application do
   def start(_type, _args) do
     children = [
       UnLib.Repo,
-      UnLib.Vault
+      UnLib.Vault,
+      {Finch, name: UnLib.Finch}
     ]
 
     Supervisor.start_link(children, @opts)

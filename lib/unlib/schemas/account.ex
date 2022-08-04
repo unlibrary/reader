@@ -1,4 +1,7 @@
 defmodule UnLib.Account do
+  @moduledoc """
+  Ecto Schema representing a user.
+  """
   use UnLib.Schema
   import Ecto.Changeset
 
@@ -44,7 +47,7 @@ defmodule UnLib.Account do
     update_change(changeset, :username, &String.downcase/1)
   end
 
-  def validate_username(changeset, _options \\ []) do
+  defp validate_username(changeset, _options \\ []) do
     changeset
     |> validate_format(:username, ~r/^[a-z0-9]*$/)
     |> validate_change(:username, &in_blacklist?/2)

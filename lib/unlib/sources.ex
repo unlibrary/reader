@@ -18,6 +18,11 @@ defmodule UnLib.Sources do
     |> Repo.insert_or_update()
   end
 
+  @spec list :: [Source.t()]
+  def list do
+    Repo.all(Source)
+  end
+
   @spec add(Source.t(), Account.t()) :: {:ok, Account.t()} | {:error, any()}
   def add(source, user) do
     sources = user.sources
