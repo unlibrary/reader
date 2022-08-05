@@ -8,7 +8,7 @@ defmodule UnLib.Feeds do
   @doc """
   Method to fetch data from a source.
 
-  Returns a `UnLib.Feeds.State` struct containing a list of `UnLib.ParsedEntry`. These entries can then be displayed to the user and optionally downloaded using `UnLib.ParsedEntry.download/2`.
+  Returns a `UnLib.Feeds.State` struct containing a list of `UnLib.ParsedEntry`. These entries can then be displayed to the user and optionally downloaded using `UnLib.ParsedEntry.save/2`.
   """
   @spec check(Source.t()) :: State.t()
   def check(source) do
@@ -20,7 +20,7 @@ defmodule UnLib.Feeds do
   @doc """
   Method to fetch and save new entries to the database.
 
-  The main difference between this method and `check/1` is that this method downloads the new entries. It also returns a `UnLib.Feeds.State` struct, but it contains `UnLib.Entry` instead of `UnLib.ParsedEntry`, since the items are already saved to the database.
+  The main difference between this method and `check/1` is that this method saves the new entries. It also returns a `UnLib.Feeds.State` struct, but it contains `UnLib.Entry` instead of `UnLib.ParsedEntry`, since the items are already saved to the database.
   """
   @spec pull(Source.t()) :: State.t()
   def pull(source) do
@@ -64,7 +64,7 @@ defmodule UnLib.Feeds do
 
   @spec save(State.t()) :: State.t()
   def save(state) do
-    entries = Enum.each(state.entries, &ParsedEntry.download(state.source, &1))
+    entries = Enum.map(state.entries, &ParsedEntry.save(state.source, &1))
     %State{state | entries: entries}
   end
 end

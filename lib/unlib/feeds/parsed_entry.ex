@@ -10,8 +10,8 @@ defmodule UnLib.ParsedEntry do
 
   @type t :: %{String.t() => String.t()}
 
-  @spec download(Source.t(), t()) :: Entry.t()
-  def download(source, entry) do
+  @spec save(Source.t(), t()) :: Entry.t()
+  def save(source, entry) do
     Entries.new(source, entry["pub_date"], entry["title"], entry["content"])
   end
 
