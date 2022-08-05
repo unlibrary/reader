@@ -3,14 +3,26 @@ defmodule UnLib.Feeds do
   Manages pulling, parsing and diffing feeds.
   """
 
-  alias UnLib.{Feeds.State, ParsedEntry}
+  alias UnLib.{Source, Feeds.State, ParsedEntry}
 
+  @doc """
+  Method to fetch data from a source.
+
+  Returns a `UnLib.Feeds.State` struct containing a list of `UnLib.ParsedEntry`. These entries can then be displayed to the user and optionally downloaded using `UnLib.ParsedEntry.download/2`.
+  """
+  @spec check(Source.t()) :: State.t()
   def check(source) do
     State.from(source)
     |> fetch()
     |> parse()
   end
 
+  @doc """
+  Method to fetch and save new entries to the database.
+
+  The main difference between this method and `check/1` is that this method downloads the new entries. It also returns a `UnLib.Feeds.State` struct, but it contains `UnLib.Entry` instead of `UnLib.ParsedEntry`, since the items are already saved to the database.
+  """
+  @spec pull(Source.t()) :: State.t()
   def pull(source) do
     source
     |> check()

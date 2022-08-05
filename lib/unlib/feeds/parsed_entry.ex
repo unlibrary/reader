@@ -15,7 +15,7 @@ defmodule UnLib.ParsedEntry do
     Entries.new(source, entry["pub_date"], entry["title"], entry["content"])
   end
 
-  @spec already_saved?(ParsedEntry.t()) :: boolean()
+  @spec already_saved?(t()) :: boolean()
   def already_saved?(entry) do
     case attempt_entry_from_db(entry) do
       %Entry{} -> true
