@@ -29,7 +29,7 @@ defmodule UnLib.ParsedEntry do
     Entry
     |> where(date: ^date)
     |> where(title: ^entry["title"])
-    |> where(content: ^entry["content"])
+    |> where(body: ^entry["content"])
     |> Repo.one()
   end
 end
