@@ -12,10 +12,15 @@ defmodule UnLib.Sources do
       name: name,
       url: url,
       type: type,
-      icon: "https://#{url}/favicon.ico",
+      icon: get_icon(url),
       validate_required: true
     })
     |> Repo.insert_or_update()
+  end
+
+  defp get_icon(url) do
+    %URI{scheme: scheme, host: host} = URI.parse(url)
+    "#{scheme}://#{host}/favicon.ico"
   end
 
   @spec list :: [Source.t()]
