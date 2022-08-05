@@ -6,3 +6,5 @@ config :unlib, UnLib.Repo,
   username: "postgres",
   password: "postgres",
   pool: Ecto.Adapters.SQL.Sandbox
+
+config :bcrypt_elixir, :log_rounds, 1

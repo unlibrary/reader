@@ -22,6 +22,7 @@ defmodule UnLib.Source do
     field :type, Ecto.Enum, values: [:rss, :atom, :mf2], default: :rss
 
     many_to_many :users, UnLib.Account, join_through: "users_sources"
+    has_many :entries, UnLib.Entry
   end
 
   def changeset(changeset, params \\ %{}) do

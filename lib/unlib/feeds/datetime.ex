@@ -15,8 +15,8 @@ defmodule UnLib.DateTime do
   end
 
   @spec human_datetime(NaiveDateTime.t()) :: String.t()
-  def human_datetime(d) do
-    "#{d.day}/#{d.month}/#{d.year}"
+  def human_datetime(datetime) do
+    "#{datetime.day}/#{datetime.month}/#{datetime.year}"
   end
 
   @spec to_rfc822(NaiveDateTime.t()) :: rfc822()

@@ -3,23 +3,28 @@ defmodule UnLib.Feeds do
   Manages pulling, parsing and diffing feeds.
   """
 
-  alias UnLib.{Feed}
-  alias UnLib.{Entries}
+  alias UnLib.{Feeds.State, ParsedEntry}
 
-  # def pull(source) do
-  #   Feed.from(source)
-  #   |> fetch()
-  #   |> parse()
-  # end
+  def check(source) do
+    State.from(source)
+    |> fetch()
+    |> parse()
+  end
 
-  @spec fetch(Feed.t()) :: Feed.t()
-  def fetch(feed) do
+  def pull(source) do
+    source
+    |> check()
+    |> save()
+  end
+
+  @spec fetch(State.t()) :: State.t()
+  def fetch(state) do
     response_data =
-      feed.source.url
+      state.source.url
       |> make_request()
       |> handle_response()
 
-    %Feed{feed | xml: response_data}
+    %State{state | xml: response_data}
   end
 
   defp make_request(url) do
@@ -33,12 +38,21 @@ defmodule UnLib.Feeds do
     response_data
   end
 
-  @spec parse(Feed.t()) :: Feed.t()
-  def parse(feed) do
-    {:ok, parsed_xml} = FastRSS.parse(feed.xml)
+  @spec parse(State.t()) :: State.t()
+  def parse(state) do
+    {:ok, parsed_xml} = FastRSS.parse(state.xml)
 
-    parsed_xml["items"]
-    |> Enum.take(5)
-    |> Enum.map(&Entries.new(&1["pub_date"], &1["title"], &1["content"]))
+    entries =
+      parsed_xml["items"]
+      |> Enum.take(5)
+      |> Enum.reject(&ParsedEntry.already_saved?/1)
+
+    %State{state | entries: entries}
+  end
+
+  @spec save(State.t()) :: State.t()
+  def save(state) do
+    entries = Enum.each(state.entries, &ParsedEntry.download(state.source, &1))
+    %State{state | entries: entries}
   end
 end

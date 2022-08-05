@@ -2,11 +2,10 @@ defmodule UnLib.DateTime.RFC2822 do
   @moduledoc """
   Parses RFC822 datetimes into `NaiveDateTime`.
 
-  stolen from Calendar library, I'm not smart enough to write this mess ;)
-  copyright Lau Taarnskov
+  Copyright Lau Taarnskov. I stole this from the Calendar library, I'm not smart enough to write this mess ;)
 
-  source: https://github.com/lau/calendar/blob/master/lib/calendar/date_time/parse.ex#L82
-  license: https://github.com/lau/calendar/blob/master/LICENSE
+  Source: https://github.com/lau/calendar/blob/master/lib/calendar/date_time/parse.ex#L82
+  License: https://github.com/lau/calendar/blob/master/LICENSE
   """
 
   @type t :: String.t()
