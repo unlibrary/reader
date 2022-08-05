@@ -8,4 +8,4 @@
 
 UnLib.Feeds.check(source)
 UnLib.Feeds.pull(source)
-%UnLib.Feeds.State{entries: []} = UnLib.Feeds.check(source)
+%UnLib.Feeds.Data{entries: []} = UnLib.Feeds.check(source)

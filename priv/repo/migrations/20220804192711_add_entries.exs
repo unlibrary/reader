@@ -6,6 +6,7 @@ defmodule UnLib.Repo.Migrations.AddEntries do
       add :date, :naive_datetime
       add :title, :string
       add :body, :text
+      add :url, :string
 
       add :source_id, references(:sources)
     end

@@ -4,18 +4,16 @@ defmodule UnLib.Entries do
   """
 
   alias UnLib.{Repo, Account, Source, Entry}
-  alias UnLib.{DateTime}
 
   import Ecto.Query
 
-  @spec new(Source.t(), DateTime.rfc822(), String.t(), String.t()) :: Entry.t()
-  def new(source, date, title, body) do
-    date = DateTime.from_rfc822(date)
-
+  @spec new(Source.t(), NaiveDateTime.t(), String.t(), String.t(), String.t()) :: Entry.t()
+  def new(source, date, title, body, url) do
     Ecto.build_assoc(source, :entries, %{
       date: date,
       title: title,
-      body: body
+      body: body,
+      url: url
     })
     |> Repo.insert!()
   end

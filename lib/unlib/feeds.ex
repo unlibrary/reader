@@ -3,16 +3,16 @@ defmodule UnLib.Feeds do
   Manages pulling, parsing and diffing feeds.
   """
 
-  alias UnLib.{Source, Feeds.State, ParsedEntry}
+  alias UnLib.{Source, Feeds.Data, ParsedEntry}
 
   @doc """
   Method to fetch data from a source.
 
-  Returns a `UnLib.Feeds.State` struct containing a list of `UnLib.ParsedEntry`. These entries can then be displayed to the user and optionally downloaded using `UnLib.ParsedEntry.save/2`.
+  Returns a `UnLib.Feeds.Data` struct containing a list of `UnLib.ParsedEntry`. These entries can then be displayed to the user and optionally downloaded using `UnLib.ParsedEntry.save/2`.
   """
-  @spec check(Source.t()) :: State.t()
+  @spec check(Source.t()) :: Data.t()
   def check(source) do
-    State.from(source)
+    Data.from(source)
     |> fetch()
     |> parse()
   end
@@ -20,23 +20,23 @@ defmodule UnLib.Feeds do
   @doc """
   Method to fetch and save new entries to the database.
 
-  The main difference between this method and `check/1` is that this method saves the new entries. It also returns a `UnLib.Feeds.State` struct, but it contains `UnLib.Entry` instead of `UnLib.ParsedEntry`, since the items are already saved to the database.
+  The main difference between this method and `check/1` is that this method saves the new entries. It also returns a `UnLib.Feeds.Data` struct, but it contains `UnLib.Entry` instead of `UnLib.ParsedEntry`, since the items are already saved to the database.
   """
-  @spec pull(Source.t()) :: State.t()
+  @spec pull(Source.t()) :: Data.t()
   def pull(source) do
     source
     |> check()
     |> save()
   end
 
-  @spec fetch(State.t()) :: State.t()
-  def fetch(state) do
+  @spec fetch(Data.t()) :: Data.t()
+  def fetch(data) do
     response_data =
-      state.source.url
+      data.source.url
       |> make_request()
       |> handle_response()
 
-    %State{state | xml: response_data}
+    %Data{data | xml: response_data}
   end
 
   defp make_request(url) do
@@ -50,21 +50,22 @@ defmodule UnLib.Feeds do
     response_data
   end
 
-  @spec parse(State.t()) :: State.t()
-  def parse(state) do
-    {:ok, parsed_xml} = FastRSS.parse(state.xml)
+  @spec parse(Data.t()) :: Data.t()
+  def parse(data) do
+    {:ok, parsed_xml} = FastRSS.parse(data.xml)
 
     entries =
       parsed_xml["items"]
       |> Enum.take(5)
+      |> Enum.map(&ParsedEntry.from/1)
       |> Enum.reject(&ParsedEntry.already_saved?/1)
 
-    %State{state | entries: entries}
+    %Data{data | entries: entries}
   end
 
-  @spec save(State.t()) :: State.t()
-  def save(state) do
-    entries = Enum.map(state.entries, &ParsedEntry.save(state.source, &1))
-    %State{state | entries: entries}
+  @spec save(Data.t()) :: Data.t()
+  def save(data) do
+    entries = Enum.map(data.entries, &ParsedEntry.save(data.source, &1))
+    %Data{data | entries: entries}
   end
 end

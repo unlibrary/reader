@@ -1,11 +1,11 @@
-defmodule UnLib.Feeds.State do
+defmodule UnLib.Feeds.Data do
   @moduledoc """
   Struct representing a feed.
 
   Used internally to manage feeds.
   """
 
-  alias UnLib.{Source, Feeds.State, Entry, ParsedEntry}
+  alias UnLib.{Source, Feeds.Data, Entry, ParsedEntry}
 
   defstruct xml: nil, entries: [], source: nil
 
@@ -16,6 +16,6 @@ defmodule UnLib.Feeds.State do
         }
   @spec from(Source.t()) :: t()
   def from(source) do
-    %State{source: source}
+    %Data{source: source}
   end
 end

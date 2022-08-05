@@ -3,33 +3,58 @@ defmodule UnLib.ParsedEntry do
   Map representing a parsed RSS entry.
   """
 
-  alias UnLib.{Repo, Source, Entry}
+  alias UnLib.{Repo, Source, Entry, ParsedEntry}
   alias UnLib.{Entries, DateTime}
 
   import Ecto.Query
 
-  @type t :: %{String.t() => String.t()}
+  defstruct [:date, :title, :body, :url]
+
+  @type t :: %ParsedEntry{
+          date: DateTime.rfc822(),
+          title: String.t(),
+          body: String.t(),
+          url: String.t()
+        }
+
+  @type rss_entry :: %{String.t() => String.t()}
+
+  @spec from(rss_entry()) :: t()
+  def from(%{
+        "pub_date" => pub_date,
+        "title" => title,
+        "content" => content,
+        "link" => link
+      }) do
+    %ParsedEntry{
+      date: pub_date,
+      title: title,
+      body: content,
+      url: link
+    }
+  end
 
   @spec save(Source.t(), t()) :: Entry.t()
   def save(source, entry) do
-    Entries.new(source, entry["pub_date"], entry["title"], entry["content"])
+    date = DateTime.from_rfc822(entry.date)
+    Entries.new(source, date, entry.title, entry.body, entry.url)
   end
 
   @spec already_saved?(t()) :: boolean()
   def already_saved?(entry) do
-    case attempt_entry_from_db(entry) do
+    case maybe_get(entry) do
       %Entry{} -> true
       _ -> false
     end
   end
 
-  defp attempt_entry_from_db(entry) do
-    date = DateTime.from_rfc822(entry["pub_date"])
+  defp maybe_get(entry) do
+    date = DateTime.from_rfc822(entry.date)
 
     Entry
     |> where(date: ^date)
-    |> where(title: ^entry["title"])
-    |> where(body: ^entry["content"])
+    |> where(title: ^entry.title)
+    |> where(body: ^entry.body)
     |> Repo.one()
   end
 end

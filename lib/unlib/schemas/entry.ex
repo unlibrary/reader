@@ -12,6 +12,7 @@ defmodule UnLib.Entry do
     field :date, :naive_datetime
     field :title, :string
     field :body, :string
+    field :url, :string
 
     belongs_to :source, UnLib.Source
   end
