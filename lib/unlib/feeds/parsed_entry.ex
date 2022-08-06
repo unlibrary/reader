@@ -49,12 +49,8 @@ defmodule UnLib.ParsedEntry do
   end
 
   defp maybe_get(entry) do
-    date = DateTime.from_rfc822(entry.date)
-
     Entry
-    |> where(date: ^date)
-    |> where(title: ^entry.title)
-    |> where(body: ^entry.body)
+    |> where(url: ^entry.url)
     |> Repo.one()
   end
 end
