@@ -9,7 +9,7 @@ defmodule UnLib.MixProject do
       source_url: "https://github.com/unlibrary/reader",
       app: :unlib,
       version: "0.1.0",
-      elixir: "~> 1.13",
+      elixir: "~> 1.12",
       start_permanent: @mix_env == :prod,
       elixirc_paths: elixirc_paths(Mix.env()),
       deps: deps(),
