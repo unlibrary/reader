@@ -14,7 +14,9 @@ defmodule UnLib.Entry do
     field :body, :string
     field :url, :string
 
-    belongs_to :source, UnLib.Source
+    belongs_to :source, UnLib.Source,
+      references: :url,
+      foreign_key: :source_url
   end
 
   def changeset(changeset, params \\ %{}) do

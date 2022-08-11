@@ -10,6 +10,7 @@ defmodule UnLib.Account do
 
   @derive {Jason.Encoder, except: [:hashed_password, :salt]}
 
+  @foreign_key_type :string
   typed_schema "users" do
     field :username, :string
     field :password, :string, virtual: true, redact: true
@@ -17,7 +18,10 @@ defmodule UnLib.Account do
     field :salt, :string
     field :email, UnLib.Vault.Binary
 
-    many_to_many :sources, UnLib.Source, join_through: "users_sources", on_replace: :delete
+    many_to_many :sources, UnLib.Source,
+      join_through: "users_sources",
+      on_replace: :delete,
+      join_keys: [account_id: :id, source_url: :url]
 
     timestamps()
   end

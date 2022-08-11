@@ -26,7 +26,7 @@ defmodule UnLib.Entries do
   @spec list(Source.t()) :: [Entry.t()]
   def list(%Source{} = source) do
     Entry
-    |> where(source_id: ^source.id)
+    |> where(source_url: ^source.url)
     |> Repo.all()
   end
 
@@ -48,7 +48,7 @@ defmodule UnLib.Entries do
   @spec prune(Source.t()) :: :ok
   def prune(source) do
     Entry
-    |> where(source_id: ^source.id)
+    |> where(source_url: ^source.url)
     |> Repo.delete_all()
 
     :ok

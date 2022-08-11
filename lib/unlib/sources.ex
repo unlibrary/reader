@@ -4,9 +4,9 @@ defmodule UnLib.Sources do
   """
 
   alias UnLib.{Repo, Source, Account}
-  import Ecto.Changeset
+  import Ecto.{Changeset, Query}
 
-  @spec new(String.t(), atom(), String.t() | nil) :: Source.t()
+  @spec new(String.t(), atom(), String.t() | nil) :: {:ok, Source.t()} | {:error, any()}
   def new(url, type, name \\ nil) do
     Source.changeset(%Source{}, %{
       name: name,
@@ -26,6 +26,22 @@ defmodule UnLib.Sources do
   @spec list :: [Source.t()]
   def list do
     Repo.all(Source)
+  end
+
+  @spec list(Account.t()) :: [Source.t()]
+  def list(account) do
+    account.sources
+  end
+
+  @spec get_by_url(String.t()) :: {:ok, Source.t()} | {:error, any()}
+  def get_by_url(url) do
+    Source
+    |> where(url: ^url)
+    |> Repo.one()
+    |> case do
+      nil -> {:error, "Source not found"}
+      source -> {:ok, source}
+    end
   end
 
   @spec add(Source.t(), Account.t()) :: {:ok, Account.t()} | {:error, any()}
