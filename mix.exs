@@ -46,7 +46,7 @@ defmodule UnLib.MixProject do
       translate: ["gettext.extract", "gettext.merge priv/gettext --no-fuzzy"],
       "ecto.setup": ["ecto.create", "ecto.migrate"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
-      test: ["ecto.create --quiet", "ecto.migrate --quiet", "test --exclude broken"]
+      test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"]
     ]
   end
 
