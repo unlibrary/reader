@@ -10,10 +10,12 @@ defmodule UnLib.Feeds do
 
   Runs pull/1 for every source in the database.
   """
+  @spec pull_all :: [Data.t()]
   def pull_all do
     Source
     |> UnLib.Repo.all()
-    |> Enum.each(&pull/1)
+    |> Enum.map(&Task.async(fn -> pull(&1) end))
+    |> Task.await_many()
   end
 
   @doc """
@@ -35,6 +37,8 @@ defmodule UnLib.Feeds do
   """
   @spec pull(Source.t()) :: Data.t()
   def pull(source) do
+    IO.inspect(source.name)
+
     source
     |> check()
     |> save()
