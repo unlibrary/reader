@@ -6,6 +6,17 @@ defmodule UnLib.Feeds do
   alias UnLib.{Source, Feeds.Data, ParsedEntry}
 
   @doc """
+  Method to pull new entries for all sources.
+
+  Runs pull/1 for every source in the database.
+  """
+  def pull_all do
+    Source
+    |> UnLib.Repo.all()
+    |> Enum.each(&pull/1)
+  end
+
+  @doc """
   Method to fetch data from a source.
 
   Returns a `UnLib.Feeds.Data` struct containing a list of `UnLib.ParsedEntry`. These entries can then be displayed to the user and optionally downloaded using `UnLib.ParsedEntry.save/2`.
