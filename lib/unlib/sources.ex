@@ -8,7 +8,16 @@ defmodule UnLib.Sources do
 
   @spec new(String.t(), atom(), String.t() | nil) :: {:ok, Source.t()} | {:error, any()}
   def new(url, type, name \\ nil) do
-    Source.changeset(%Source{}, %{
+    base_source =
+      case get_by_url(url) do
+        {:ok, source} ->
+          source
+
+        {:error, _} ->
+          %Source{}
+      end
+
+    Source.changeset(base_source, %{
       name: name,
       url: url,
       type: type,
@@ -53,6 +62,8 @@ defmodule UnLib.Sources do
       |> change()
       |> put_assoc(:sources, sources ++ [source])
       |> Repo.insert_or_update()
+    else
+      {:error, "already in account"}
     end
   end
 
@@ -65,6 +76,8 @@ defmodule UnLib.Sources do
       |> change()
       |> put_assoc(:sources, sources -- [source])
       |> Repo.insert_or_update()
+    else
+      {:error, "source not in account"}
     end
   end
 end
