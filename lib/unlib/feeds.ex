@@ -15,7 +15,7 @@ defmodule UnLib.Feeds do
     Source
     |> UnLib.Repo.all()
     |> Enum.map(&Task.async(fn -> pull(&1) end))
-    |> Task.await_many()
+    |> Task.await_many(:infinity)
   end
 
   @doc """
@@ -37,8 +37,6 @@ defmodule UnLib.Feeds do
   """
   @spec pull(Source.t()) :: Data.t()
   def pull(source) do
-    IO.inspect(source.name)
-
     source
     |> check()
     |> save()
