@@ -28,6 +28,7 @@ defmodule UnLib.Entries do
     Entry
     |> where(source_url: ^source.url)
     |> Repo.all()
+    |> Repo.preload(:source)
   end
 
   @spec list(Account.t()) :: [Entry.t()]
@@ -46,7 +47,7 @@ defmodule UnLib.Entries do
     |> Repo.one()
     |> case do
       nil -> {:error, "entry not found"}
-      source -> {:ok, source}
+      entry -> {:ok, Repo.preload(entry, :source)}
     end
   end
 
