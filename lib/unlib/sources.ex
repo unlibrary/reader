@@ -48,7 +48,7 @@ defmodule UnLib.Sources do
     |> where(url: ^url)
     |> Repo.one()
     |> case do
-      nil -> {:error, "Source not found"}
+      nil -> {:error, "source not found"}
       source -> {:ok, source}
     end
   end

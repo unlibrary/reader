@@ -39,6 +39,17 @@ defmodule UnLib.Entries do
     |> List.flatten()
   end
 
+  @spec get_by_url(String.t()) :: {:ok, Entry.t()} | {:error, any()}
+  def get_by_url(url) do
+    Entry
+    |> where(url: ^url)
+    |> Repo.one()
+    |> case do
+      nil -> {:error, "entry not found"}
+      source -> {:ok, source}
+    end
+  end
+
   @spec prune :: :ok
   def prune do
     Repo.delete_all(Entry)
