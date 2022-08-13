@@ -9,8 +9,8 @@ defmodule UnLib.Account do
   alias TheBigUsernameBlacklist, as: Blacklist
 
   @derive {Jason.Encoder, except: [:hashed_password, :salt]}
-
   @foreign_key_type :string
+
   typed_schema "users" do
     field :username, :string
     field :password, :string, virtual: true, redact: true

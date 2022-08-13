@@ -7,6 +7,7 @@ defmodule UnLib.Entry do
   import Ecto.Changeset
 
   @derive Jason.Encoder
+  @foreign_key_type :string
 
   typed_schema "entries" do
     field :date, :naive_datetime
