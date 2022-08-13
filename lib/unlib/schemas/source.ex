@@ -15,8 +15,8 @@ defmodule UnLib.Source do
 
   @derive Jason.Encoder
 
-  @primary_key {:url, :string, autogenerate: false}
   typed_schema "sources" do
+    field :url, :string
     field :name, :string
     field :icon, :string
 
@@ -36,5 +36,6 @@ defmodule UnLib.Source do
     |> cast(params, [:url, :name, :icon, :type])
     |> validate_required([:url, :type])
     |> validate_format(:url, ~r/https?:\/\//)
+    |> unique_constraint(:url)
   end
 end

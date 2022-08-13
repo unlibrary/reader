@@ -9,7 +9,6 @@ defmodule UnLib.Account do
   alias TheBigUsernameBlacklist, as: Blacklist
 
   @derive {Jason.Encoder, except: [:hashed_password, :salt]}
-  @foreign_key_type :string
 
   typed_schema "users" do
     field :username, :string
@@ -20,8 +19,7 @@ defmodule UnLib.Account do
 
     many_to_many :sources, UnLib.Source,
       join_through: "users_sources",
-      on_replace: :delete,
-      join_keys: [account_id: :id, source_url: :url]
+      on_replace: :delete
 
     timestamps()
   end

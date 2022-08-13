@@ -7,7 +7,6 @@ defmodule UnLib.Entry do
   import Ecto.Changeset
 
   @derive Jason.Encoder
-  @foreign_key_type :string
 
   typed_schema "entries" do
     field :date, :naive_datetime
@@ -15,9 +14,7 @@ defmodule UnLib.Entry do
     field :body, :string
     field :url, :string
 
-    belongs_to :source, UnLib.Source,
-      references: :url,
-      foreign_key: :source_url
+    belongs_to :source, UnLib.Source
   end
 
   def changeset(changeset, params \\ %{}) do
