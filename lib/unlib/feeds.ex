@@ -61,7 +61,7 @@ defmodule UnLib.Feeds do
         %Data{data | xml: response_data}
 
       {:error, _} ->
-        %Data{data | error: "could not download feeds"}
+        %Data{data | error: "could not download feed for #{data.source.name}"}
     end
   end
 
