@@ -40,6 +40,11 @@ defmodule UnLib.Entries do
     |> List.flatten()
   end
 
+  @spec get(String.t()) :: {:ok, Entry.t()} | {:error, any()}
+  def get(id) do
+    Repo.get(Entry, id)
+  end
+
   @spec get_by_url(String.t()) :: {:ok, Entry.t()} | {:error, any()}
   def get_by_url(url) do
     Entry
