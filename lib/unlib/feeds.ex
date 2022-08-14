@@ -44,12 +44,9 @@ defmodule UnLib.Feeds do
 
   @spec fetch(Data.t()) :: Data.t()
   def fetch(data) do
-    response_data =
-      data.source.url
-      |> make_request()
-      |> handle_response()
-
-    %Data{data | xml: response_data}
+    data.source.url
+    |> make_request()
+    |> handle_response(data)
   end
 
   defp make_request(url) do
@@ -58,13 +55,18 @@ defmodule UnLib.Feeds do
     |> Finch.request(UnLib.Finch)
   end
 
-  defp handle_response(response) do
-    {:ok, %Finch.Response{status: 200, body: response_data}} = response
-    response_data
+  defp handle_response(response, data) do
+    case response do
+      {:ok, %Finch.Response{status: 200, body: response_data}} ->
+        %Data{data | xml: response_data}
+
+      {:error, _} ->
+        %Data{data | error: "could not download feeds"}
+    end
   end
 
   @spec parse(Data.t()) :: Data.t()
-  def parse(data) do
+  def parse(data) when not data.error do
     {:ok, parsed_xml} = FastRSS.parse(data.xml)
 
     entries =
@@ -74,6 +76,10 @@ defmodule UnLib.Feeds do
       |> Enum.reject(&ParsedEntry.already_saved?/1)
 
     %Data{data | entries: entries}
+  end
+
+  def parse(data) do
+    %Data{data | entries: []}
   end
 
   @spec save(Data.t()) :: Data.t()
