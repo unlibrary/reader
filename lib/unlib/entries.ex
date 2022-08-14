@@ -43,6 +43,10 @@ defmodule UnLib.Entries do
   @spec get(String.t()) :: {:ok, Entry.t()} | {:error, any()}
   def get(id) do
     Repo.get(Entry, id)
+    |> case do
+      nil -> {:error, "entry not found"}
+      entry -> {:ok, Repo.preload(entry, :source)}
+    end
   end
 
   @spec get_by_url(String.t()) :: {:ok, Entry.t()} | {:error, any()}
