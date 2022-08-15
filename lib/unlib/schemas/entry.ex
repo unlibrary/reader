@@ -14,12 +14,16 @@ defmodule UnLib.Entry do
     field :body, :string
     field :url, :string
 
+    field :read?, :boolean,
+      source: :read,
+      default: false
+
     belongs_to :source, UnLib.Source
   end
 
   def changeset(changeset, params \\ %{}) do
     changeset
-    |> cast(params, [:date, :title, :body])
+    |> cast(params, [:date, :title, :body, :read?])
     |> validate_required([:date, :title, :body])
   end
 end

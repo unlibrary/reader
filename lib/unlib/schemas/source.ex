@@ -24,6 +24,8 @@ defmodule UnLib.Source do
       values: [:rss, :atom, :mf2],
       default: :rss
 
+    field :read_list, {:array, :string}
+
     many_to_many :users, UnLib.Account,
       join_through: "users_sources",
       join_keys: [source_url: :url, account_id: :id]

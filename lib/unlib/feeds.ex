@@ -22,6 +22,8 @@ defmodule UnLib.Feeds do
   Method to fetch data from a source.
 
   Returns a `UnLib.Feeds.Data` struct containing a list of `UnLib.ParsedEntry`. These entries can then be displayed to the user and optionally downloaded using `UnLib.ParsedEntry.save/2`.
+
+  Entries that are already saved or read are not returned.
   """
   @spec check(Source.t()) :: Data.t()
   def check(source) do
@@ -74,6 +76,7 @@ defmodule UnLib.Feeds do
       |> Enum.take(5)
       |> Enum.map(&ParsedEntry.from/1)
       |> Enum.reject(&ParsedEntry.already_saved?/1)
+      |> Enum.reject(&ParsedEntry.already_read?(&1, data.source))
 
     %Data{data | entries: entries}
   end

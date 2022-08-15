@@ -53,4 +53,21 @@ defmodule UnLib.ParsedEntry do
     |> where(url: ^entry.url)
     |> Repo.one()
   end
+
+  @spec already_read?(t(), Source.t()) :: boolean()
+  def already_read?(entry, source) do
+    downloaded_and_read(entry) or in_source_read_list(entry.url, source)
+  end
+
+  defp downloaded_and_read(parsed_entry) do
+    if entry = maybe_get(parsed_entry) do
+      entry.read?
+    else
+      false
+    end
+  end
+
+  defp in_source_read_list(url, source) do
+    url in source.read_list
+  end
 end

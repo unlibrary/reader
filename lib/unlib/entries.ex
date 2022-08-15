@@ -60,15 +60,38 @@ defmodule UnLib.Entries do
     end
   end
 
-  @spec prune :: :ok
-  def prune do
+  @spec read(Entry.t()) :: Entry.t()
+  def read(entry) do
+    Entry.changeset(entry, %{read?: true})
+    |> Repo.update!()
+  end
+
+  @spec prune(:all | :unread) :: :ok
+  def prune(:all) do
     Repo.delete_all(Entry)
     :ok
   end
 
-  @spec prune(Source.t()) :: :ok
-  def prune(source) do
+  def prune(:unread) do
     Entry
+    |> where(read?: true)
+    |> Repo.delete_all()
+
+    :ok
+  end
+
+  @spec prune(:all | :unread, Source.t()) :: :ok
+  def prune(:all, source) do
+    Entry
+    |> where(source_url: ^source.url)
+    |> Repo.delete_all()
+
+    :ok
+  end
+
+  def prune(:unread, source) do
+    Entry
+    |> where(read?: true)
     |> where(source_url: ^source.url)
     |> Repo.delete_all()
 

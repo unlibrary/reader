@@ -7,6 +7,7 @@ defmodule UnLib.Repo.Migrations.AddEntries do
       add :title, :string
       add :body, :text
       add :url, :string
+      add :read, :boolean
 
       add :source_id, references(:sources)
     end
