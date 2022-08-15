@@ -24,7 +24,9 @@ defmodule UnLib.Source do
       values: [:rss, :atom, :mf2],
       default: :rss
 
-    field :read_list, {:array, :string}
+    field :read_list,
+          {:array, :string},
+          default: []
 
     many_to_many :users, UnLib.Account,
       join_through: "users_sources",
@@ -35,7 +37,7 @@ defmodule UnLib.Source do
 
   def changeset(changeset, params \\ %{}) do
     changeset
-    |> cast(params, [:url, :name, :icon, :type])
+    |> cast(params, [:url, :name, :icon, :type, :read_list])
     |> validate_required([:url, :type])
     |> validate_format(:url, ~r/https?:\/\//)
     |> unique_constraint(:url)

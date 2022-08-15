@@ -3,7 +3,7 @@ defmodule UnLib.Sources do
   Manages sources for an user.
   """
 
-  alias UnLib.{Repo, Source, Account}
+  alias UnLib.{Repo, Source, Account, Feeds, Feeds.Data}
   import Ecto.{Changeset, Query}
 
   @spec new(String.t(), atom(), String.t() | nil) :: {:ok, Source.t()} | {:error, any()}
@@ -79,5 +79,34 @@ defmodule UnLib.Sources do
     else
       {:error, "source not in account"}
     end
+  end
+
+  # i cant fking explain what this function does (and i hate comments),
+  # but here i go:
+  #
+  # i delete all read posts from the database when the user runs prune,
+  # but i dont want to redownload them. to prevent this i keep a list of urls
+  # in the source that holds all urls of posts i already read.
+  # but this list can get very long. the pull function only downloads the first
+  # x posts (configurable), so really i only need to check
+  # if they are read (the rest will never be redownloaded). this function
+  # removes all unneeded urls from the read_list on a source struct
+
+  @spec clean_read_list(Source.t()) :: {:ok, Source.t()} | {:error, any()}
+  def clean_read_list(source) do
+    entry_urls = get_newest_entries_urls(source)
+    read_list = only_keep_newest_entry_urls(entry_urls, source.read_list)
+
+    Source.changeset(source, %{read_list: read_list})
+    |> Repo.update()
+  end
+
+  defp get_newest_entries_urls(source) do
+    %Data{entries: entries} = Feeds.check(source)
+    Enum.map(entries, fn entry -> entry.url end)
+  end
+
+  defp only_keep_newest_entry_urls(entry_urls, read_list) do
+    Enum.filter(read_list, fn url -> url in entry_urls end)
   end
 end

@@ -60,10 +60,10 @@ defmodule UnLib.Entries do
     end
   end
 
-  @spec read(Entry.t()) :: Entry.t()
+  @spec read(Entry.t()) :: {:ok, Entry.t()} | {:error, any()}
   def read(entry) do
     Entry.changeset(entry, %{read?: true})
-    |> Repo.update!()
+    |> Repo.update()
   end
 
   @spec prune(:all | :read) :: :ok
