@@ -3,13 +3,19 @@ defmodule UnLib.Entries do
   Manages RSS entries.
   """
 
+  alias UnLib.{Repo, Account, Source, Entry}
+  import Ecto.Query
+
   @type prune_opts :: [
           include_unread: boolean(),
           source: Source.t()
         ]
 
-  alias UnLib.{Repo, Account, Source, Entry}
-  import Ecto.Query
+  @type list_opts :: [
+          include_read: boolean(),
+          source: Source.t(),
+          account: Account.t()
+        ]
 
   @spec new(Source.t(), NaiveDateTime.t(), String.t(), String.t(), String.t()) :: Entry.t()
   def new(source, date, title, body, url) do
@@ -22,26 +28,42 @@ defmodule UnLib.Entries do
     |> Repo.insert!()
   end
 
-  @spec list :: [Entry.t()]
-  def list do
-    Repo.all(Entry)
-  end
+  @spec list(list_opts()) :: [Entry.t()]
+  def list(opts \\ [])
 
-  @spec list(Source.t()) :: [Entry.t()]
-  def list(%Source{} = source) do
+  def list([source: source] = opts) do
     Entry
     |> where(source_url: ^source.url)
     |> Repo.all()
+    |> maybe_exclude_read_entries(opts)
     |> Repo.preload(:source)
   end
 
-  @spec list(Account.t()) :: [Entry.t()]
-  def list(%Account{} = account) do
+  def list([account: account] = opts) do
     account = Repo.preload(account, sources: :entries)
 
     account.sources
     |> Enum.map(fn source -> source.entries end)
     |> List.flatten()
+    |> maybe_exclude_read_entries(opts)
+  end
+
+  def list(include_read: true) do
+    Repo.all(Entry)
+  end
+
+  def list(_opts) do
+    Entry
+    |> where(read?: false)
+    |> Repo.all()
+  end
+
+  defp maybe_exclude_read_entries(entries, opts) do
+    if opts.include_read == true do
+      entries
+    else
+      Enum.reject(entries, fn entry -> entry.read? end)
+    end
   end
 
   @spec get(String.t()) :: {:ok, Entry.t()} | {:error, any()}
