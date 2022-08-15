@@ -85,6 +85,8 @@ defmodule UnLib.Entries do
   end
 
   @spec prune(:all | :read) :: :ok
+  def prune(mode \\ :read)
+
   def prune(:all) do
     Repo.delete_all(Entry)
     :ok
@@ -98,8 +100,10 @@ defmodule UnLib.Entries do
     :ok
   end
 
-  @spec prune(:all | :read, Source.t()) :: :ok
-  def prune(:all, source) do
+  @spec prune(Source.t(), :all | :read) :: :ok
+  def prune(source, mode)
+
+  def prune(source, :all) do
     Entry
     |> where(source_url: ^source.url)
     |> Repo.delete_all()
@@ -107,7 +111,7 @@ defmodule UnLib.Entries do
     :ok
   end
 
-  def prune(:read, source) do
+  def prune(source, :read) do
     Entry
     |> where(read?: true)
     |> where(source_url: ^source.url)
