@@ -3,8 +3,12 @@ defmodule UnLib.Entries do
   Manages RSS entries.
   """
 
-  alias UnLib.{Repo, Account, Source, Entry}
+  @type prune_opts :: [
+          include_unread: boolean(),
+          source: Source.t()
+        ]
 
+  alias UnLib.{Repo, Account, Source, Entry}
   import Ecto.Query
 
   @spec new(Source.t(), NaiveDateTime.t(), String.t(), String.t(), String.t()) :: Entry.t()
@@ -84,37 +88,34 @@ defmodule UnLib.Entries do
     |> Repo.update()
   end
 
-  @spec prune(:all | :read) :: :ok
-  def prune(mode \\ :read)
+  @spec prune(prune_opts()) :: :ok
+  def prune(opts \\ [])
 
-  def prune(:all) do
+  def prune(source: source, include_unread: true) do
+    Entry
+    |> where(source_url: ^source.url)
+    |> Repo.delete_all()
+
+    :ok
+  end
+
+  def prune(source: source) do
+    Entry
+    |> where(read?: true)
+    |> where(source_url: ^source.url)
+    |> Repo.delete_all()
+
+    :ok
+  end
+
+  def prune(include_unread: true) do
     Repo.delete_all(Entry)
     :ok
   end
 
-  def prune(:read) do
+  def prune(_opts) do
     Entry
     |> where(read?: true)
-    |> Repo.delete_all()
-
-    :ok
-  end
-
-  @spec prune(Source.t(), :all | :read) :: :ok
-  def prune(source, mode)
-
-  def prune(source, :all) do
-    Entry
-    |> where(source_url: ^source.url)
-    |> Repo.delete_all()
-
-    :ok
-  end
-
-  def prune(source, :read) do
-    Entry
-    |> where(read?: true)
-    |> where(source_url: ^source.url)
     |> Repo.delete_all()
 
     :ok
