@@ -68,7 +68,7 @@ defmodule UnLib.Feeds do
   end
 
   @spec parse(Data.t()) :: Data.t()
-  def parse(data) when not data.error do
+  def parse(data) when is_nil(data.error) do
     {:ok, parsed_xml} = FastRSS.parse(data.xml)
 
     entries =

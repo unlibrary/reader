@@ -62,7 +62,25 @@ defmodule UnLib.Entries do
 
   @spec read(Entry.t()) :: {:ok, Entry.t()} | {:error, any()}
   def read(entry) do
+    Repo.transaction(fn ->
+      with {:ok, entry} <- mark_entry_as_read(entry),
+           {:ok, _source} <- add_url_to_read_list(entry.url, entry.source) do
+        entry
+      else
+        {:error, error} -> Repo.rollback(error)
+      end
+    end)
+  end
+
+  defp mark_entry_as_read(entry) do
     Entry.changeset(entry, %{read?: true})
+    |> Repo.update()
+  end
+
+  defp add_url_to_read_list(url, source) do
+    Source.changeset(source, %{
+      read_list: [url | source.read_list]
+    })
     |> Repo.update()
   end
 
