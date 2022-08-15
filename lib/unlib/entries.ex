@@ -4,18 +4,8 @@ defmodule UnLib.Entries do
   """
 
   alias UnLib.{Repo, Account, Source, Entry}
+
   import Ecto.Query
-
-  @type prune_opts :: [
-          include_unread: boolean(),
-          source: Source.t()
-        ]
-
-  @type list_opts :: [
-          include_read: boolean(),
-          source: Source.t(),
-          account: Account.t()
-        ]
 
   @spec new(Source.t(), NaiveDateTime.t(), String.t(), String.t(), String.t()) :: Entry.t()
   def new(source, date, title, body, url) do
@@ -28,42 +18,26 @@ defmodule UnLib.Entries do
     |> Repo.insert!()
   end
 
-  @spec list(list_opts()) :: [Entry.t()]
-  def list(opts \\ [])
+  @spec list :: [Entry.t()]
+  def list do
+    Repo.all(Entry)
+  end
 
-  def list([source: source] = opts) do
+  @spec list(Source.t()) :: [Entry.t()]
+  def list(%Source{} = source) do
     Entry
     |> where(source_url: ^source.url)
     |> Repo.all()
-    |> maybe_exclude_read_entries(opts)
     |> Repo.preload(:source)
   end
 
-  def list([account: account] = opts) do
+  @spec list(Account.t()) :: [Entry.t()]
+  def list(%Account{} = account) do
     account = Repo.preload(account, sources: :entries)
 
     account.sources
     |> Enum.map(fn source -> source.entries end)
     |> List.flatten()
-    |> maybe_exclude_read_entries(opts)
-  end
-
-  def list(include_read: true) do
-    Repo.all(Entry)
-  end
-
-  def list(_opts) do
-    Entry
-    |> where(read?: false)
-    |> Repo.all()
-  end
-
-  defp maybe_exclude_read_entries(entries, opts) do
-    if opts.include_read == true do
-      entries
-    else
-      Enum.reject(entries, fn entry -> entry.read? end)
-    end
   end
 
   @spec get(String.t()) :: {:ok, Entry.t()} | {:error, any()}
@@ -110,34 +84,33 @@ defmodule UnLib.Entries do
     |> Repo.update()
   end
 
-  @spec prune(prune_opts()) :: :ok
-  def prune(opts \\ [])
-
-  def prune(source: source, include_unread: true) do
-    Entry
-    |> where(source_url: ^source.url)
-    |> Repo.delete_all()
-
-    :ok
-  end
-
-  def prune(source: source) do
-    Entry
-    |> where(read?: true)
-    |> where(source_url: ^source.url)
-    |> Repo.delete_all()
-
-    :ok
-  end
-
-  def prune(include_unread: true) do
+  @spec prune(:all | :read) :: :ok
+  def prune(:all) do
     Repo.delete_all(Entry)
     :ok
   end
 
-  def prune(_opts) do
+  def prune(:read) do
     Entry
     |> where(read?: true)
+    |> Repo.delete_all()
+
+    :ok
+  end
+
+  @spec prune(:all | :read, Source.t()) :: :ok
+  def prune(:all, source) do
+    Entry
+    |> where(source_url: ^source.url)
+    |> Repo.delete_all()
+
+    :ok
+  end
+
+  def prune(:read, source) do
+    Entry
+    |> where(read?: true)
+    |> where(source_url: ^source.url)
     |> Repo.delete_all()
 
     :ok
