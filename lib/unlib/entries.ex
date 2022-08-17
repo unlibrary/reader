@@ -20,11 +20,26 @@ defmodule UnLib.Entries do
 
   @spec list :: [Entry.t()]
   def list do
+    Entry
+    |> where(read?: false)
+    |> Repo.all()
+  end
+
+  @spec list(Source.t()) :: [Entry.t()]
+  @spec list(Account.t()) :: [Entry.t()]
+  def list(source) do
+    source
+    |> list_all()
+    |> Enum.reject(& &1.read?)
+  end
+
+  @spec list_all :: [Entry.t()]
+  def list_all do
     Repo.all(Entry)
   end
 
   @spec list(Source.t()) :: [Entry.t()]
-  def list(%Source{} = source) do
+  def list_all(%Source{} = source) do
     Entry
     |> where(source_url: ^source.url)
     |> Repo.all()
@@ -32,7 +47,7 @@ defmodule UnLib.Entries do
   end
 
   @spec list(Account.t()) :: [Entry.t()]
-  def list(%Account{} = account) do
+  def list_all(%Account{} = account) do
     account = Repo.preload(account, sources: :entries)
 
     account.sources
@@ -84,13 +99,8 @@ defmodule UnLib.Entries do
     |> Repo.update()
   end
 
-  @spec prune(:all | :read) :: :ok
-  def prune(:all) do
-    Repo.delete_all(Entry)
-    :ok
-  end
-
-  def prune(:read) do
+  @spec prune() :: :ok
+  def prune() do
     Entry
     |> where(read?: true)
     |> Repo.delete_all()
@@ -98,18 +108,26 @@ defmodule UnLib.Entries do
     :ok
   end
 
-  @spec prune(:all | :read, Source.t()) :: :ok
-  def prune(:all, source) do
+  @spec prune_all() :: :ok
+  def prune_all do
+    Repo.delete_all(Entry)
+
+    :ok
+  end
+
+  @spec prune(Source.t()) :: :ok
+  def prune(source) do
     Entry
+    |> where(read?: true)
     |> where(source_url: ^source.url)
     |> Repo.delete_all()
 
     :ok
   end
 
-  def prune(:read, source) do
+  @spec prune_all(Source.t()) :: :ok
+  def prune_all(source) do
     Entry
-    |> where(read?: true)
     |> where(source_url: ^source.url)
     |> Repo.delete_all()
 
