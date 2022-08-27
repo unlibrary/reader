@@ -38,24 +38,26 @@ defmodule UnLib.Entries do
     Repo.all(Entry)
   end
 
-  @spec list(Source.t()) :: [Entry.t()]
+  @spec list_all(Source.t()) :: [Entry.t()]
   def list_all(%Source{} = source) do
     Entry
-    |> where(source_url: ^source.url)
+    |> where(source_id: ^source.id)
+    |> order_by([e], desc: e.date)
     |> Repo.all()
     |> Repo.preload(:source)
   end
 
-  @spec list(Account.t()) :: [Entry.t()]
+  @spec list_all(Account.t()) :: [Entry.t()]
   def list_all(%Account{} = account) do
-    account = Repo.preload(account, sources: :entries)
-
-    account.sources
+    account
+    |> Ecto.assoc(:sources)
+    |> preload(entries: ^from(e in Entry, order_by: [desc: e.date]))
+    |> Repo.all()
     |> Enum.map(fn source -> source.entries end)
     |> List.flatten()
   end
 
-  @spec get(String.t()) :: {:ok, Entry.t()} | {:error, any()}
+  @spec get(Ecto.UUID.t()) :: {:ok, Entry.t()} | {:error, any()}
   def get(id) do
     Repo.get(Entry, id)
     |> case do

@@ -24,12 +24,20 @@ defmodule UnLib.ParsedEntry do
         "pub_date" => pub_date,
         "title" => title,
         "content" => content,
+        "description" => description,
         "link" => link
       }) do
+    body =
+      if content do
+        content
+      else
+        description
+      end
+
     %ParsedEntry{
       date: pub_date,
       title: title,
-      body: content,
+      body: body,
       url: link
     }
   end

@@ -45,6 +45,15 @@ defmodule UnLib.Sources do
     account.sources
   end
 
+  @spec get(Ecto.UUID.t()) :: {:ok, Source.t()} | {:error, any()}
+  def get(id) do
+    Repo.get(Source, id)
+    |> case do
+      nil -> {:error, "source not found"}
+      source -> {:ok, Repo.preload(source, :entries)}
+    end
+  end
+
   @spec get_by_url(String.t()) :: {:ok, Source.t()} | {:error, any()}
   def get_by_url(url) do
     Source
