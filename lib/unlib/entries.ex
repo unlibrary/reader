@@ -132,20 +132,34 @@ defmodule UnLib.Entries do
   end
 
   @spec prune(Source.t()) :: :ok
-  def prune(source) do
+  def prune(%Source{id: id}) do
     Entry
     |> where(read?: true)
-    |> where(source_url: ^source.url)
+    |> where(source_id: ^id)
     |> Repo.delete_all()
 
     :ok
   end
 
+  @spec prune(Account.t()) :: :ok
+  def prune(%Account{sources: sources}) do
+    Enum.each(sources, &prune/1)
+
+    :ok
+  end
+
   @spec prune_all(Source.t()) :: :ok
-  def prune_all(source) do
+  def prune_all(%Source{id: id}) do
     Entry
-    |> where(source_url: ^source.url)
+    |> where(source_id: ^id)
     |> Repo.delete_all()
+
+    :ok
+  end
+
+  @spec prune_all(Account.t()) :: :ok
+  def prune_all(%Account{sources: sources}) do
+    Enum.each(sources, &prune_all/1)
 
     :ok
   end
