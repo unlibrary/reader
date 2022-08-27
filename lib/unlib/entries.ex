@@ -51,7 +51,7 @@ defmodule UnLib.Entries do
   def list_all(%Account{} = account) do
     account
     |> Ecto.assoc(:sources)
-    |> preload(entries: ^from(e in Entry, order_by: [desc: e.date]))
+    |> preload(entries: ^from(e in Entry, order_by: [desc: e.date], preload: [:source]))
     |> Repo.all()
     |> Enum.map(fn source -> source.entries end)
     |> List.flatten()
@@ -91,8 +91,7 @@ defmodule UnLib.Entries do
 
   @spec read_all :: [{:ok, Entry.t()}] | [{:error, any()}]
   def read_all do
-    Entry
-    |> Repo.all()
+    list_all()
     |> Enum.each(&read/1)
   end
 
