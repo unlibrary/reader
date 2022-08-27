@@ -27,8 +27,8 @@ defmodule UnLib.Entries do
 
   @spec list(Source.t()) :: [Entry.t()]
   @spec list(Account.t()) :: [Entry.t()]
-  def list(source) do
-    source
+  def list(source_or_account) do
+    source_or_account
     |> list_all()
     |> Enum.reject(& &1.read?)
   end
@@ -85,6 +85,21 @@ defmodule UnLib.Entries do
         {:error, error} -> Repo.rollback(error)
       end
     end)
+  end
+
+  @spec read_all :: [{:ok, Entry.t()}] | [{:error, any()}]
+  def read_all do
+    Entry
+    |> Repo.all()
+    |> Enum.each(&read/1)
+  end
+
+  @spec read_all(Account.t()) :: [{:ok, Entry.t()}] | [{:error, any()}]
+  @spec read_all(Source.t()) :: [{:ok, Entry.t()}] | [{:error, any()}]
+  def read_all(source_or_account) do
+    source_or_account
+    |> list_all()
+    |> Enum.each(&read/1)
   end
 
   defp mark_entry_as_read(entry) do
