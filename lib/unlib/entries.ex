@@ -134,7 +134,7 @@ defmodule UnLib.Entries do
 
   defp remove_url_from_read_list(url, source) do
     Source.changeset(source, %{
-      read_list: [source.read_list] -- [url]
+      read_list: source.read_list -- [url]
     })
     |> Repo.update()
   end
