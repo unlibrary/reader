@@ -89,6 +89,18 @@ defmodule UnLib.Entries do
     end)
   end
 
+  defp mark_entry_as_read(entry) do
+    Entry.changeset(entry, %{read?: true})
+    |> Repo.update()
+  end
+
+  defp add_url_to_read_list(url, source) do
+    Source.changeset(source, %{
+      read_list: [url | source.read_list]
+    })
+    |> Repo.update()
+  end
+
   @spec read_all :: [{:ok, Entry.t()}] | [{:error, any()}]
   def read_all do
     list_all()
@@ -103,16 +115,42 @@ defmodule UnLib.Entries do
     |> Enum.each(&read/1)
   end
 
-  defp mark_entry_as_read(entry) do
-    Entry.changeset(entry, %{read?: true})
+  @spec unread(Entry.t()) :: {:ok, Entry.t()} | {:error, any()}
+  def unread(entry) do
+    Repo.transaction(fn ->
+      with {:ok, entry} <- mark_entry_as_unread(entry),
+           {:ok, _source} <- remove_url_from_read_list(entry.url, entry.source) do
+        entry
+      else
+        {:error, error} -> Repo.rollback(error)
+      end
+    end)
+  end
+
+  defp mark_entry_as_unread(entry) do
+    Entry.changeset(entry, %{read?: false})
     |> Repo.update()
   end
 
-  defp add_url_to_read_list(url, source) do
+  defp remove_url_from_read_list(url, source) do
     Source.changeset(source, %{
-      read_list: [url | source.read_list]
+      read_list: [source.read_list] -- [url]
     })
     |> Repo.update()
+  end
+
+  @spec unread_all :: [{:ok, Entry.t()}] | [{:error, any()}]
+  def unread_all do
+    list_all()
+    |> Enum.each(&unread/1)
+  end
+
+  @spec unread_all(Account.t()) :: [{:ok, Entry.t()}] | [{:error, any()}]
+  @spec unread_all(Source.t()) :: [{:ok, Entry.t()}] | [{:error, any()}]
+  def unread_all(source_or_account) do
+    source_or_account
+    |> list_all()
+    |> Enum.each(&unread/1)
   end
 
   @spec prune() :: :ok
