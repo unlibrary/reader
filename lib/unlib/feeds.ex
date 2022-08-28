@@ -23,14 +23,14 @@ defmodule UnLib.Feeds do
   The main difference between this method and `check/1` is that this method saves the new entries. It also returns a `UnLib.Feeds.Data` struct, but it contains `UnLib.Entry` instead of `UnLib.ParsedEntry`, since the items are already saved to the database.
   """
   @spec pull(Source.t()) :: Data.t()
-  def pull(source) do
+  def pull(%Source{} = source) do
     source
     |> check()
     |> save()
   end
 
   @spec pull(Account.t()) :: Data.t()
-  def pull(account) do
+  def pull(%Account{} = account) do
     account
     |> Ecto.assoc(:sources)
     |> Repo.all()
