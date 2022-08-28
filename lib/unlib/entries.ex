@@ -129,6 +129,20 @@ defmodule UnLib.Entries do
     |> Enum.each(&unread/1)
   end
 
+  @spec delete(Ecto.UUID.t()) :: :ok
+  def delete(id) when is_binary(id) do
+    Entry
+    |> where(id: ^id)
+    |> Repo.delete_all()
+
+    :ok
+  end
+
+  @spec delete(Entry.t()) :: :ok
+  def delete(%Entry{id: id}) do
+    delete(id)
+  end
+
   @spec prune(Source.t()) :: :ok
   def prune(%Source{id: id}) do
     Entry
