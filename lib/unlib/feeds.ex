@@ -3,19 +3,18 @@ defmodule UnLib.Feeds do
   Manages pulling, parsing and diffing feeds.
   """
 
-  alias UnLib.{Source, Feeds.Data, ParsedEntry}
+  alias UnLib.{Repo, Account, Source, Feeds.Data, ParsedEntry}
 
   @doc """
   Method to pull new entries for all sources.
 
   Runs pull/1 for every source in the database.
   """
-  @spec pull_all :: [Data.t()]
-  def pull_all do
+  @spec pull :: [Data.t()]
+  def pull do
     Source
-    |> UnLib.Repo.all()
-    |> Enum.map(&Task.async(fn -> pull(&1) end))
-    |> Task.await_many(:infinity)
+    |> Repo.all()
+    |> pull_sources()
   end
 
   @doc """
@@ -28,6 +27,20 @@ defmodule UnLib.Feeds do
     source
     |> check()
     |> save()
+  end
+
+  @spec pull(Account.t()) :: Data.t()
+  def pull(account) do
+    account
+    |> Ecto.assoc(:sources)
+    |> Repo.all()
+    |> pull_sources()
+  end
+
+  defp pull_sources(sources) do
+    sources
+    |> Enum.map(&Task.async(fn -> pull(&1) end))
+    |> Task.await_many(:infinity)
   end
 
   @doc """
