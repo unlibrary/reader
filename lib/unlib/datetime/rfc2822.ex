@@ -10,10 +10,9 @@ defmodule UnLib.DateTime.RFC2822 do
 
   @type t :: String.t()
 
-  @spec parse(t()) :: NaiveDateTime.t()
+  @spec parse(t()) :: {:ok, NaiveDateTime.t()} | {:error, any()}
   def parse(string) do
     cap = Regex.named_captures(rfc2822_regex(), string)
-
     month_number = number_for_month(cap["month"])
 
     NaiveDateTime.from_erl(

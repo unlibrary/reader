@@ -12,7 +12,7 @@ defmodule UnLib.MixProject do
       elixir: "~> 1.12",
       start_permanent: @mix_env == :prod,
       elixirc_paths: elixirc_paths(Mix.env()),
-      deps: deps(),
+      deps: deps() ++ test_deps(),
       aliases: aliases()
     ]
   end
@@ -37,6 +37,14 @@ defmodule UnLib.MixProject do
       {:fast_rss, github: "RobinBoers/fast_rss"},
       {:ex_doc, "~> 0.24", only: :dev, runtime: false},
       {:the_big_username_blacklist, "~> 0.1.2"}
+    ]
+  end
+
+  defp test_deps do
+    [
+      {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
+      {:dialyxir, "~> 1.1", only: [:dev], runtime: false},
+      {:ex_check, "~> 0.14.0", only: [:dev], runtime: false}
     ]
   end
 

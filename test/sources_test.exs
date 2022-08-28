@@ -4,8 +4,8 @@ defmodule SourcesTest do
 
   import UnLib.Fixtures
 
-  alias UnLib.{Account, Source}
-  alias UnLib.{Accounts, Sources}
+  alias UnLib.{Account, Source, Entry}
+  alias UnLib.{Accounts, Sources, Entries}
 
   test "new/3 returns source struct" do
     {:ok, %Source{}} = Sources.new(valid_feed_url(), :rss)
@@ -13,6 +13,40 @@ defmodule SourcesTest do
 
   test "new/3 validates url" do
     {:error, %Ecto.Changeset{}} = Sources.new("notanurl", :rss)
+  end
+
+  test "new/3 updates source if it exists and get_by_url/1 works" do
+    {:ok, %Source{id: id, name: "ye"}} = Sources.new(valid_feed_url(), :rss, "ye")
+    {:ok, %Source{id: ^id, name: "yo"} = s} = Sources.new(valid_feed_url(), :rss, "yo")
+
+    {:ok, source} = Sources.get_by_url(valid_feed_url())
+    assert source == s
+  end
+
+  test "get_by_url/1 returns error if source doesn't exist" do
+    assert {:error, "source not found"} == Sources.get_by_url("someotherurl")
+  end
+
+  test "list/0 lists all sources and list/1 lists sources in an account" do
+    username = "robijntje"
+    {:ok, user} = Accounts.create(username, valid_password())
+
+    for x <- 0..9 do
+      Sources.new("#{valid_feed_url()}#{x}", :rss, "#{x}")
+    end
+
+    for x <- 0..4 do
+      {:ok, source} = Sources.new("#{valid_feed_url()}#{x}", :rss)
+      {:ok, _user} = Sources.add(source, user)
+    end
+
+    sources = Sources.list()
+    assert is_list(sources)
+    assert length(sources) == 10
+
+    sources = Sources.list(user)
+    assert is_list(sources)
+    assert length(sources) == 5
   end
 
   test "add/2 adds source to account and remove/2 removes it" do
@@ -26,5 +60,31 @@ defmodule SourcesTest do
     {:ok, user} = Sources.remove(source, user)
 
     assert user.sources == []
+  end
+
+  test "clean_read_list/1 works" do
+    {:ok, %Source{id: source_id} = source} = Sources.new(valid_feed_url(), :rss)
+    populate_db_with_entries()
+    entries = Entries.list(source)
+
+    {:ok, %Entry{read?: true}} = UnLib.Entries.read(hd(entries))
+    {:ok, source} = UnLib.Sources.get(source_id)
+
+    assert source.read_list != []
+    assert length(source.read_list) == 1
+
+    # make a mess of the read_list
+    source =
+      source
+      |> Source.changeset(%{read_list: source.read_list ++ ["someotherthing"]})
+      |> Repo.update!()
+
+    assert source.read_list != []
+    assert length(source.read_list) == 2
+
+    {:ok, source} = Sources.clean_read_list(source)
+
+    assert source.read_list != []
+    assert length(source.read_list) == 1
   end
 end

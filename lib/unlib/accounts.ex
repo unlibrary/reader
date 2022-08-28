@@ -81,7 +81,7 @@ defmodule UnLib.Accounts do
     end
   end
 
-  @spec update(Account.t(), String.t(), any()) ::
+  @spec update(Account.t(), String.t() | atom(), any()) ::
           {:ok, Account.t()} | {:error, any()}
   def update(%Account{} = user, key, value) do
     Account.changeset(user, %{key => value})

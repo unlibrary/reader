@@ -9,11 +9,11 @@ defmodule UnLib.Feeds.Data do
 
   defstruct xml: nil, entries: [], source: nil, error: nil
 
-  @type t :: %{
-          xml: String.t(),
-          entries: [ParsedEntry.t() | Entry.t()],
-          source: Source.t(),
-          error: nil | String.t()
+  @type t :: %__MODULE__{
+          :xml => nil | String.t(),
+          :entries => list() | [ParsedEntry.t() | Entry.t()],
+          :source => Source.t(),
+          :error => nil | String.t()
         }
 
   @spec from(Source.t()) :: t()

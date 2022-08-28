@@ -42,7 +42,9 @@ defmodule UnLib.Sources do
 
   @spec list(Account.t()) :: [Source.t()]
   def list(account) do
-    account.sources
+    account
+    |> Ecto.assoc(:sources)
+    |> Repo.all()
   end
 
   @spec get(Ecto.UUID.t()) :: {:ok, Source.t()} | {:error, any()}
@@ -69,13 +71,13 @@ defmodule UnLib.Sources do
   def add(source, user) do
     sources = user.sources
 
-    if source not in sources do
+    if source in sources do
+      {:error, "already in account"}
+    else
       user
       |> change()
       |> put_assoc(:sources, sources ++ [source])
       |> Repo.insert_or_update()
-    else
-      {:error, "already in account"}
     end
   end
 
@@ -106,15 +108,22 @@ defmodule UnLib.Sources do
 
   @spec clean_read_list(Source.t()) :: {:ok, Source.t()} | {:error, any()}
   def clean_read_list(source) do
-    entry_urls = get_newest_entries_urls(source)
-    read_list = only_keep_newest_entry_urls(entry_urls, source.read_list)
+    read_list =
+      source
+      |> get_newest_entries_urls()
+      |> only_keep_newest_entry_urls(source.read_list)
 
     Source.changeset(source, %{read_list: read_list})
     |> Repo.update()
   end
 
   defp get_newest_entries_urls(source) do
-    %Data{entries: entries} = Feeds.check(source)
+    %Data{entries: entries} =
+      source
+      |> Data.from()
+      |> Feeds.fetch()
+      |> Feeds.parse()
+
     Enum.map(entries, fn entry -> entry.url end)
   end
 

@@ -10,6 +10,18 @@ defmodule UnLib.Fixtures do
   end
 
   def valid_feed_url do
-    "https://stackoverflow.blog/newsletter/feed"
+    "https://blog.geheimesite.nl/index.xml"
+  end
+
+  def populate_db_with_entries do
+    {:ok, source} = UnLib.Sources.new(valid_feed_url(), :rss)
+    data = UnLib.Feeds.Data.from(source)
+
+    xml = File.read!("test/support/feed.xml")
+
+    %UnLib.Feeds.Data{data | xml: xml}
+    |> UnLib.Feeds.parse()
+    |> UnLib.Feeds.filter()
+    |> UnLib.Feeds.save()
   end
 end

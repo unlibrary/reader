@@ -58,6 +58,7 @@ defmodule AccountsTest do
 
     {:ok, user} = Accounts.get(user_id)
     assert user.username == username
+    assert user.sources == []
   end
 
   test "get_by_username/1 returns an account struct" do
@@ -66,6 +67,7 @@ defmodule AccountsTest do
 
     {:ok, user} = Accounts.get_by_username(username)
     assert user.id == user_id
+    assert user.sources == []
   end
 
   test "get_by_username/1 returns an error at unknown username" do

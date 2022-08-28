@@ -18,24 +18,12 @@ defmodule UnLib.Entries do
     |> Repo.insert!()
   end
 
-  @spec list :: [Entry.t()]
-  def list do
-    Entry
-    |> where(read?: false)
-    |> Repo.all()
-  end
-
   @spec list(Source.t()) :: [Entry.t()]
   @spec list(Account.t()) :: [Entry.t()]
   def list(source_or_account) do
     source_or_account
     |> list_all()
     |> Enum.reject(& &1.read?)
-  end
-
-  @spec list_all :: [Entry.t()]
-  def list_all do
-    Repo.all(Entry)
   end
 
   @spec list_all(Source.t()) :: [Entry.t()]
@@ -101,14 +89,8 @@ defmodule UnLib.Entries do
     |> Repo.update()
   end
 
-  @spec read_all :: [{:ok, Entry.t()}] | [{:error, any()}]
-  def read_all do
-    list_all()
-    |> Enum.each(&read/1)
-  end
-
-  @spec read_all(Account.t()) :: [{:ok, Entry.t()}] | [{:error, any()}]
-  @spec read_all(Source.t()) :: [{:ok, Entry.t()}] | [{:error, any()}]
+  @spec read_all(Account.t()) :: :ok
+  @spec read_all(Source.t()) :: :ok
   def read_all(source_or_account) do
     source_or_account
     |> list_all()
@@ -139,34 +121,12 @@ defmodule UnLib.Entries do
     |> Repo.update()
   end
 
-  @spec unread_all :: [{:ok, Entry.t()}] | [{:error, any()}]
-  def unread_all do
-    list_all()
-    |> Enum.each(&unread/1)
-  end
-
-  @spec unread_all(Account.t()) :: [{:ok, Entry.t()}] | [{:error, any()}]
-  @spec unread_all(Source.t()) :: [{:ok, Entry.t()}] | [{:error, any()}]
+  @spec unread_all(Account.t()) :: :ok
+  @spec unread_all(Source.t()) :: :ok
   def unread_all(source_or_account) do
     source_or_account
     |> list_all()
     |> Enum.each(&unread/1)
-  end
-
-  @spec prune() :: :ok
-  def prune() do
-    Entry
-    |> where(read?: true)
-    |> Repo.delete_all()
-
-    :ok
-  end
-
-  @spec prune_all() :: :ok
-  def prune_all do
-    Repo.delete_all(Entry)
-
-    :ok
   end
 
   @spec prune(Source.t()) :: :ok
@@ -182,7 +142,6 @@ defmodule UnLib.Entries do
   @spec prune(Account.t()) :: :ok
   def prune(%Account{sources: sources}) do
     Enum.each(sources, &prune/1)
-
     :ok
   end
 
@@ -198,7 +157,6 @@ defmodule UnLib.Entries do
   @spec prune_all(Account.t()) :: :ok
   def prune_all(%Account{sources: sources}) do
     Enum.each(sources, &prune_all/1)
-
     :ok
   end
 end

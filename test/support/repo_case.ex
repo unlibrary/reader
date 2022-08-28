@@ -1,4 +1,5 @@
 defmodule UnLib.RepoCase do
+  @moduledoc false
   use ExUnit.CaseTemplate
 
   using do
@@ -6,17 +7,15 @@ defmodule UnLib.RepoCase do
       alias UnLib.Repo
 
       import Ecto
+      import Ecto.Changeset
       import Ecto.Query
       import UnLib.RepoCase
     end
   end
 
   setup tags do
-    :ok = Ecto.Adapters.SQL.Sandbox.checkout(UnLib.Repo)
-
-    unless tags[:async] do
-      Ecto.Adapters.SQL.Sandbox.mode(UnLib.Repo, {:shared, self()})
-    end
+    pid = Ecto.Adapters.SQL.Sandbox.start_owner!(UnLib.Repo, shared: not tags[:async])
+    on_exit(fn -> Ecto.Adapters.SQL.Sandbox.stop_owner(pid) end)
 
     :ok
   end
