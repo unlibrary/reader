@@ -37,12 +37,11 @@ defmodule UnLib.Entries do
 
   @spec list_all(Account.t()) :: [Entry.t()]
   def list_all(%Account{} = account) do
-    account
-    |> Ecto.assoc(:sources)
-    |> preload(entries: ^from(e in Entry, order_by: [desc: e.date], preload: [:source]))
+    account.sources
+    |> Ecto.assoc(:entries)
+    |> order_by([e], desc: e.date)
+    |> preload(:source)
     |> Repo.all()
-    |> Enum.map(fn source -> source.entries end)
-    |> List.flatten()
   end
 
   @spec get(Ecto.UUID.t()) :: {:ok, Entry.t()} | {:error, any()}

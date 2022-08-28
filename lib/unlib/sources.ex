@@ -44,6 +44,7 @@ defmodule UnLib.Sources do
   def list(account) do
     account
     |> Ecto.assoc(:sources)
+    |> preload(:entries)
     |> Repo.all()
   end
 
