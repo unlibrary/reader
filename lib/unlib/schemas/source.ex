@@ -24,10 +24,6 @@ defmodule UnLib.Source do
       values: [:rss, :atom, :mf2],
       default: :rss
 
-    field :read_list,
-          {:array, :string},
-          default: []
-
     many_to_many :users, UnLib.Account,
       join_through: "users_sources",
       join_keys: [source_url: :url, account_id: :id]
@@ -35,9 +31,10 @@ defmodule UnLib.Source do
     has_many :entries, UnLib.Entry
   end
 
+  @spec changeset(Ecto.Changeset.t() | t(), map()) :: Ecto.Changeset.t()
   def changeset(changeset, params \\ %{}) do
     changeset
-    |> cast(params, [:url, :name, :icon, :type, :read_list])
+    |> cast(params, [:url, :name, :icon, :type])
     |> validate_required([:url, :type])
     |> validate_format(:url, ~r/https?:\/\//)
     |> unique_constraint(:url)

@@ -1,6 +1,6 @@
 defmodule UnLib.Entry do
   @moduledoc """
-  Ecto Schema representing a RSS entry.
+  Ecto Schema representing an RSS entry.
   """
 
   use UnLib.Schema
@@ -21,6 +21,7 @@ defmodule UnLib.Entry do
     belongs_to :source, UnLib.Source
   end
 
+  @spec changeset(Ecto.Changeset.t() | t(), map()) :: Ecto.Changeset.t()
   def changeset(changeset, params \\ %{}) do
     changeset
     |> cast(params, [:date, :title, :body, :read?])

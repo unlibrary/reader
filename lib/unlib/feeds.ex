@@ -105,7 +105,7 @@ defmodule UnLib.Feeds do
       data.entries
       |> Enum.take(5)
       |> Enum.reject(&ParsedEntry.already_saved?/1)
-      |> Enum.reject(&ParsedEntry.already_read?(&1, data.source))
+      |> Enum.reject(&ParsedEntry.already_read?/1)
 
     %Data{data | entries: entries}
   end

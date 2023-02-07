@@ -21,9 +21,12 @@ defmodule UnLib.Account do
       join_through: "users_sources",
       on_replace: :delete
 
+    has_many :read_entries, UnLib.ReadEntry
+
     timestamps()
   end
 
+  @spec changeset(Ecto.Changeset.t() | t(), map()) :: Ecto.Changeset.t()
   def changeset(changeset, params \\ %{}) do
     changeset
     |> cast(params, [:username, :password, :email])

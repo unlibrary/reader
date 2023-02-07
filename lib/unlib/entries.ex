@@ -3,7 +3,7 @@ defmodule UnLib.Entries do
   Manages RSS entries.
   """
 
-  alias UnLib.{Repo, Account, Source, Entry}
+  alias UnLib.{Repo, Account, Source, Entry, ReadEntry}
 
   import Ecto.Query
 
@@ -68,7 +68,7 @@ defmodule UnLib.Entries do
   def read(entry) do
     Repo.transaction(fn ->
       with {:ok, entry} <- mark_entry_as_read(entry),
-           {:ok, _source} <- add_url_to_read_list(entry.url, entry.source) do
+           {:ok, _read_entry} <- add_entry_to_read_entries(entry) do
         entry
       else
         {:error, error} -> Repo.rollback(error)
@@ -81,11 +81,10 @@ defmodule UnLib.Entries do
     |> Repo.update()
   end
 
-  defp add_url_to_read_list(url, source) do
-    Source.changeset(source, %{
-      read_list: [url | source.read_list]
-    })
-    |> Repo.update()
+  defp add_entry_to_read_entries(entry) do
+    %ReadEntry{}
+    |> ReadEntry.changeset(entry)
+    |> Repo.insert()
   end
 
   @spec read_all(Account.t()) :: :ok
@@ -97,10 +96,10 @@ defmodule UnLib.Entries do
   end
 
   @spec unread(Entry.t()) :: {:ok, Entry.t()} | {:error, any()}
-  def unread(entry) do
+  def unread(read_entry) do
     Repo.transaction(fn ->
-      with {:ok, entry} <- mark_entry_as_unread(entry),
-           {:ok, _source} <- remove_url_from_read_list(entry.url, entry.source) do
+      with {:ok, entry} <- mark_entry_as_unread(read_entry),
+           {:ok, _entry} <- remove_entry_from_read_entries(read_entry) do
         entry
       else
         {:error, error} -> Repo.rollback(error)
@@ -113,11 +112,9 @@ defmodule UnLib.Entries do
     |> Repo.update()
   end
 
-  defp remove_url_from_read_list(url, source) do
-    Source.changeset(source, %{
-      read_list: source.read_list -- [url]
-    })
-    |> Repo.update()
+  defp remove_entry_from_read_entries(read_entry) do
+    read_entry
+    |> Repo.delete()
   end
 
   @spec unread_all(Account.t()) :: :ok

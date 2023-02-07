@@ -61,30 +61,4 @@ defmodule SourcesTest do
 
     assert user.sources == []
   end
-
-  test "clean_read_list/1 works" do
-    {:ok, %Source{id: source_id} = source} = Sources.new(valid_feed_url(), :rss)
-    populate_db_with_entries()
-    entries = Entries.list(source)
-
-    {:ok, %Entry{read?: true}} = UnLib.Entries.read(hd(entries))
-    {:ok, source} = UnLib.Sources.get(source_id)
-
-    assert source.read_list != []
-    assert length(source.read_list) == 1
-
-    # make a mess of the read_list
-    source =
-      source
-      |> Source.changeset(%{read_list: source.read_list ++ ["someotherthing"]})
-      |> Repo.update!()
-
-    assert source.read_list != []
-    assert length(source.read_list) == 2
-
-    {:ok, source} = Sources.clean_read_list(source)
-
-    assert source.read_list != []
-    assert length(source.read_list) == 1
-  end
 end

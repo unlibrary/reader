@@ -7,7 +7,6 @@ defmodule UnLib.Repo.Migrations.AddSources do
       add :name, :string
       add :icon, :string
       add :type, :string
-      add :read_list, {:array, :string}
     end
   end
 end

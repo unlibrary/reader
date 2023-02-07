@@ -3,7 +3,7 @@ defmodule UnLib.ParsedEntry do
   Map representing a parsed RSS entry.
   """
 
-  alias UnLib.{Repo, Source, Entry, ParsedEntry}
+  alias UnLib.{Repo, Source, Entry, ReadEntry, ParsedEntry}
   alias UnLib.{Entries, DateTime}
 
   import Ecto.Query
@@ -18,6 +18,7 @@ defmodule UnLib.ParsedEntry do
         }
 
   @type rss_entry :: %{String.t() => String.t()}
+  @type entry_type :: ReadEntry | Entry
 
   @spec from(rss_entry()) :: t()
   def from(%{
@@ -56,18 +57,13 @@ defmodule UnLib.ParsedEntry do
     end
   end
 
-  defp maybe_get(entry) do
-    Entry
-    |> where(url: ^entry.url)
-    |> Repo.one()
+  @spec already_read?(t()) :: boolean()
+  def already_read?(entry) do
+    downloaded_and_read?(entry) or in_read_entries?(entry)
   end
 
-  @spec already_read?(t(), Source.t()) :: boolean()
-  def already_read?(entry, source) do
-    downloaded_and_read(entry) or in_source_read_list(entry.url, source)
-  end
-
-  defp downloaded_and_read(parsed_entry) do
+  @spec downloaded_and_read?(t()) :: boolean()
+  defp downloaded_and_read?(parsed_entry) do
     if entry = maybe_get(parsed_entry) do
       entry.read?
     else
@@ -75,7 +71,19 @@ defmodule UnLib.ParsedEntry do
     end
   end
 
-  defp in_source_read_list(url, source) do
-    url in source.read_list
+  @spec in_read_entries?(t()) :: boolean()
+  defp in_read_entries?(parsed_entry) do
+    if _read_entry = maybe_get(parsed_entry, ReadEntry) do
+      true
+    else
+      false
+    end
+  end
+
+  @spec maybe_get(t(), entry_type()) :: Entry.t() | ReadEntry.t() | nil
+  defp maybe_get(%ParsedEntry{url: entry_url}, type \\ Entry) do
+    type
+    |> where(url: ^entry_url)
+    |> Repo.one()
   end
 end
