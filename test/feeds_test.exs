@@ -6,10 +6,21 @@ defmodule FeedsTest do
 
   alias UnLib.{Accounts, Sources, Feeds, Entries}
 
+  test "Feeds.Data.from generates Feeds.Data struct with source" do
+    {:ok, source} = Sources.new(valid_feed_url(), :rss)
+
+    %Feeds.Data{
+      xml: nil,
+      entries: [],
+      source: ^source,
+      error: nil
+    } = Feeds.Data.from(source)
+  end
+
   test "pull/1 pulls a single source" do
     {:ok, source} = Sources.new(valid_feed_url(), :rss)
 
-    Feeds.pull(source)
+    _data = Feeds.pull(source)
 
     source_entries = Entries.list_unread(source)
     assert length(source_entries) == 5
@@ -22,7 +33,7 @@ defmodule FeedsTest do
     {:ok, user} = Sources.add(source, user)
     assert length(user.sources) == 1
 
-    Feeds.pull(user)
+    _data = Feeds.pull(user)
 
     user_entries = Entries.list_unread(user)
     assert length(user_entries) == 5
@@ -31,7 +42,7 @@ defmodule FeedsTest do
   test "pull/0 pulls everything" do
     {:ok, _source} = Sources.new(valid_feed_url(), :rss)
 
-    Feeds.pull()
+    _data = Feeds.pull()
 
     total_entries = Entries.list()
     assert length(total_entries) == 5
@@ -45,7 +56,7 @@ defmodule FeedsTest do
     assert hd(data).error == "could not download feed for AMAZING BLOG"
 
     total_entries = Entries.list()
-    assert length(total_entries) == 0
+    assert Enum.empty?(total_entries)
   end
 
   test "pull/0 errors on 404 URL" do
@@ -56,6 +67,62 @@ defmodule FeedsTest do
     assert hd(data).error == "could not download feed for AMAZING BLOG, got 404"
 
     total_entries = Entries.list()
-    assert length(total_entries) == 0
+    assert Enum.empty?(total_entries)
+  end
+
+  test "pull skips entries already in db" do
+    {:ok, source} = Sources.new(valid_feed_url(), :rss)
+
+    _data = Feeds.pull(source)
+
+    source_entries = Entries.list(source)
+    assert length(source_entries) == 5
+
+    _data = Feeds.pull(source)
+
+    source_entries = Entries.list(source)
+    assert length(source_entries) == 5
+  end
+
+  test "pull skips read entries" do
+    {:ok, source} = Sources.new(valid_feed_url(), :rss)
+
+    _data = Feeds.pull(source)
+
+    source_entries = Entries.list(source)
+    assert length(source_entries) == 5
+
+    :ok = Entries.read_all(source)
+    :ok = Entries.prune(source)
+
+    source_entries = Entries.list(source)
+    assert Enum.empty?(source_entries)
+
+    _data = Feeds.pull(source)
+
+    source_entries = Entries.list(source)
+    assert Enum.empty?(source_entries)
+  end
+
+  test "pull skips read entries but pulls unread ones" do
+    {:ok, source} = Sources.new(valid_feed_url(), :rss)
+
+    _data = Feeds.pull(source)
+
+    source_entries = Entries.list(source)
+    assert length(source_entries) == 5
+
+    entry = hd(source_entries)
+    {:ok, _entry} = Entries.read(entry)
+
+    :ok = Entries.delete_all(source)
+
+    source_entries = Entries.list(source)
+    assert Enum.empty?(source_entries)
+
+    _data = Feeds.pull(source)
+
+    source_entries = Entries.list(source)
+    assert length(source_entries) == 4
   end
 end

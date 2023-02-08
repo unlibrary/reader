@@ -31,18 +31,24 @@ defmodule UnLib.DateTime.RFC2822 do
     |> month_number()
   end
 
-  defp month_number("jan"), do: 1
-  defp month_number("feb"), do: 2
-  defp month_number("mar"), do: 3
-  defp month_number("apr"), do: 4
-  defp month_number("may"), do: 5
-  defp month_number("jun"), do: 6
-  defp month_number("jul"), do: 7
-  defp month_number("aug"), do: 8
-  defp month_number("sep"), do: 9
-  defp month_number("oct"), do: 10
-  defp month_number("nov"), do: 11
-  defp month_number("dec"), do: 12
+  def month_number(month_name) do
+    months = %{
+      "jan" => 1,
+      "feb" => 2,
+      "mar" => 3,
+      "apr" => 4,
+      "may" => 5,
+      "jun" => 6,
+      "jul" => 7,
+      "aug" => 8,
+      "sep" => 9,
+      "oct" => 1,
+      "nov" => 1,
+      "dec" => 1
+    }
+
+    months[month_name]
+  end
 
   defp to_int(string) do
     {int, _} = Integer.parse(string)

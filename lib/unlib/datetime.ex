@@ -21,7 +21,7 @@ defmodule UnLib.DateTime do
 
   @spec to_rfc822(NaiveDateTime.t()) :: rfc822()
   def to_rfc822(datetime) do
-    Calendar.strftime(datetime, "%a, %d %b %Y %T %z")
+    Calendar.strftime(datetime, "%a, %d %b %Y %H:%M:%S %z")
   end
 
   @spec from_rfc822(rfc822()) :: NaiveDateTime.t()

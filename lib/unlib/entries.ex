@@ -53,7 +53,7 @@ defmodule UnLib.Entries do
   def get(id) do
     Repo.get(Entry, id)
     |> case do
-      nil -> {:error, "entry not found"}
+      nil -> {:error, :entry_not_found}
       entry -> {:ok, Repo.preload(entry, :source)}
     end
   end
@@ -64,7 +64,7 @@ defmodule UnLib.Entries do
     |> where(url: ^url)
     |> Repo.one()
     |> case do
-      nil -> {:error, "entry not found"}
+      nil -> {:error, :entry_not_found}
       entry -> {:ok, Repo.preload(entry, :source)}
     end
   end
@@ -101,10 +101,10 @@ defmodule UnLib.Entries do
   end
 
   @spec unread(Entry.t()) :: {:ok, Entry.t()} | {:error, any()}
-  def unread(read_entry) do
+  def unread(entry) do
     Repo.transaction(fn ->
-      with {:ok, entry} <- mark_entry_as_unread(read_entry),
-           {:ok, _entry} <- remove_entry_from_read_entries(read_entry) do
+      with {:ok, entry} <- mark_entry_as_unread(entry),
+           {:ok, _entry} <- remove_entry_from_read_entries(entry) do
         entry
       else
         {:error, error} -> Repo.rollback(error)
@@ -117,8 +117,10 @@ defmodule UnLib.Entries do
     |> Repo.update()
   end
 
-  defp remove_entry_from_read_entries(read_entry) do
-    read_entry
+  defp remove_entry_from_read_entries(%Entry{url: entry_url}) do
+    ReadEntry
+    |> where(url: ^entry_url)
+    |> Repo.one!()
     |> Repo.delete()
   end
 
@@ -127,6 +129,7 @@ defmodule UnLib.Entries do
   def unread_all(source_or_account) do
     source_or_account
     |> list()
+    |> Enum.reject(&(&1.read? == false))
     |> Enum.each(&unread/1)
   end
 
@@ -144,6 +147,21 @@ defmodule UnLib.Entries do
     delete(id)
   end
 
+  @spec delete_all(Source.t()) :: :ok
+  def delete_all(%Source{id: id}) do
+    Entry
+    |> where(source_id: ^id)
+    |> Repo.delete_all()
+
+    :ok
+  end
+
+  @spec delete_all(Account.t()) :: :ok
+  def delete_all(%Account{sources: sources}) do
+    Enum.each(sources, &delete_all/1)
+    :ok
+  end
+
   @spec prune(Source.t()) :: :ok
   def prune(%Source{id: id}) do
     Entry
@@ -157,21 +175,6 @@ defmodule UnLib.Entries do
   @spec prune(Account.t()) :: :ok
   def prune(%Account{sources: sources}) do
     Enum.each(sources, &prune/1)
-    :ok
-  end
-
-  @spec prune_all(Source.t()) :: :ok
-  def prune_all(%Source{id: id}) do
-    Entry
-    |> where(source_id: ^id)
-    |> Repo.delete_all()
-
-    :ok
-  end
-
-  @spec prune_all(Account.t()) :: :ok
-  def prune_all(%Account{sources: sources}) do
-    Enum.each(sources, &prune_all/1)
     :ok
   end
 end

@@ -18,7 +18,6 @@ defmodule UnLib.ParsedEntry do
         }
 
   @type rss_entry :: %{String.t() => String.t()}
-  @type entry_type :: ReadEntry | Entry
 
   @spec from(rss_entry()) :: t()
   def from(%{
@@ -51,39 +50,29 @@ defmodule UnLib.ParsedEntry do
 
   @spec already_saved?(t()) :: boolean()
   def already_saved?(entry) do
-    if _entry = maybe_get(entry) do
-      true
-    else
-      false
-    end
+    maybe_get(entry) !== nil
   end
 
   @spec already_read?(t()) :: boolean()
   def already_read?(entry) do
-    downloaded_and_read?(entry) or in_read_entries?(entry)
-  end
-
-  @spec downloaded_and_read?(t()) :: boolean()
-  defp downloaded_and_read?(parsed_entry) do
-    if entry = maybe_get(parsed_entry) do
-      entry.read?
-    else
-      false
-    end
+    in_read_entries?(entry)
   end
 
   @spec in_read_entries?(t()) :: boolean()
   defp in_read_entries?(parsed_entry) do
-    if _read_entry = maybe_get(parsed_entry, ReadEntry) do
-      true
-    else
-      false
-    end
+    maybe_get_read_entry(parsed_entry) !== nil
   end
 
-  @spec maybe_get(t(), entry_type()) :: Entry.t() | ReadEntry.t() | nil
-  defp maybe_get(%ParsedEntry{url: entry_url}, type \\ Entry) do
-    type
+  @spec maybe_get(t()) :: Entry.t() | nil
+  defp maybe_get(%ParsedEntry{url: entry_url}) do
+    Entry
+    |> where(url: ^entry_url)
+    |> Repo.one()
+  end
+
+  @spec maybe_get_read_entry(t()) :: ReadEntry.t() | nil
+  def maybe_get_read_entry(%ParsedEntry{url: entry_url}) do
+    ReadEntry
     |> where(url: ^entry_url)
     |> Repo.one()
   end
