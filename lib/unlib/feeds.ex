@@ -3,7 +3,7 @@ defmodule UnLib.Feeds do
   Manages pulling, parsing and diffing feeds.
   """
 
-  alias UnLib.{Repo, Account, Source, Feeds.Data, ParsedEntry}
+  alias UnLib.{Account, Source, Sources, Feeds.Data, ParsedEntry}
 
   @doc """
   Method to pull new entries for all sources.
@@ -12,9 +12,14 @@ defmodule UnLib.Feeds do
   """
   @spec pull :: [Data.t()]
   def pull do
-    Source
-    |> Repo.all()
+    Sources.list()
     |> pull_sources()
+  end
+
+  defp pull_sources(sources) do
+    sources
+    |> Enum.map(&Task.async(fn -> pull(&1) end))
+    |> Task.await_many(:infinity)
   end
 
   @doc """
@@ -32,15 +37,8 @@ defmodule UnLib.Feeds do
   @spec pull(Account.t()) :: Data.t()
   def pull(%Account{} = account) do
     account
-    |> Ecto.assoc(:sources)
-    |> Repo.all()
+    |> Sources.list()
     |> pull_sources()
-  end
-
-  defp pull_sources(sources) do
-    sources
-    |> Enum.map(&Task.async(fn -> pull(&1) end))
-    |> Task.await_many(:infinity)
   end
 
   @doc """
@@ -77,7 +75,7 @@ defmodule UnLib.Feeds do
         %Data{data | xml: response_data}
 
       {:ok, %Finch.Response{status: status}} ->
-        %Data{data | xml: "could not download feed for #{data.source.name}, got #{status}"}
+        %Data{data | error: "could not download feed for #{data.source.name}, got #{status}"}
 
       {:error, _} ->
         %Data{data | error: "could not download feed for #{data.source.name}"}

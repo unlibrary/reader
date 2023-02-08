@@ -12,13 +12,13 @@ defmodule UnLib.ReadEntry do
     field :url, :string
 
     belongs_to :source, UnLib.Source
-    belongs_to :user, UnLib.Account
+    belongs_to :user, UnLib.Account, foreign_key: :user_id
   end
 
   @spec changeset(Ecto.Changeset.t() | t(), map()) :: Ecto.Changeset.t()
   def changeset(changeset, params \\ %{}) do
     changeset
-    |> cast(params, :url)
-    |> validate_required(:url)
+    |> cast(params, [:url])
+    |> validate_required([:url])
   end
 end

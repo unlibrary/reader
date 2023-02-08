@@ -13,6 +13,14 @@ defmodule UnLib.Fixtures do
     "https://blog.geheimesite.nl/index.xml"
   end
 
+  def invalid_feed_url do
+    "http://localhost:3000/feed.xml"
+  end
+
+  def non_existing_feed_url do
+    "https://blog.geheimesite.nl/bullshit.xml"
+  end
+
   def populate_db_with_entries do
     {:ok, source} = UnLib.Sources.new(valid_feed_url(), :rss)
     data = UnLib.Feeds.Data.from(source)

@@ -11,6 +11,10 @@ defmodule AccountsTest do
     {:ok, %Account{username: "robin"}} = Accounts.create("Robin", valid_password())
   end
 
+  test "create/3 doesn't allow blacklisted usernames" do
+    {:error, _changeset} = Accounts.create("admin", valid_password())
+  end
+
   @tag :broken
   test "create/3 validates username is unique" do
     {:error, %Account{username: "robin"}} = Accounts.create("Robin", valid_password())
@@ -78,5 +82,29 @@ defmodule AccountsTest do
 
     {:error, error} = Accounts.get_by_username(other_username)
     assert error == :not_found
+  end
+
+  test "login/2 validates password" do
+    username = "robin"
+    other_username = "robijntje"
+    password = valid_password()
+
+    {:ok, account} = Accounts.create(username, password)
+
+    {:ok, ^account} = Accounts.login(username, password)
+    {:error, :no_user_found} = Accounts.login(other_username, password)
+    {:error, :invalid_password} = Accounts.login(username, "invalid_password")
+  end
+
+  test "update/3 updates email works" do
+    username = "robin"
+    password = valid_password()
+
+    {:ok, account} = Accounts.create(username, password)
+
+    new_email = "robin@geheimesite.nl"
+
+    {:ok, account} = Accounts.update(account, :email, new_email)
+    assert account.email == new_email
   end
 end

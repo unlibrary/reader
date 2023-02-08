@@ -4,8 +4,8 @@ defmodule SourcesTest do
 
   import UnLib.Fixtures
 
-  alias UnLib.{Account, Source, Entry}
-  alias UnLib.{Accounts, Sources, Entries}
+  alias UnLib.{Account, Source}
+  alias UnLib.{Accounts, Sources}
 
   test "new/3 returns source struct" do
     {:ok, %Source{}} = Sources.new(valid_feed_url(), :rss)
@@ -13,6 +13,15 @@ defmodule SourcesTest do
 
   test "new/3 validates url" do
     {:error, %Ecto.Changeset{}} = Sources.new("notanurl", :rss)
+  end
+
+  test "get/1 works and preloads entries" do
+    {:ok, %Source{id: id, name: "ye"}} = Sources.new(valid_feed_url(), :rss, "ye")
+
+    {:ok, source} = Sources.get(id)
+    assert source.entries == []
+
+    assert {:error, :source_not_found} == Sources.get(Ecto.UUID.generate())
   end
 
   test "new/3 updates source if it exists and get_by_url/1 works" do
@@ -24,7 +33,7 @@ defmodule SourcesTest do
   end
 
   test "get_by_url/1 returns error if source doesn't exist" do
-    assert {:error, "source not found"} == Sources.get_by_url("someotherurl")
+    assert {:error, :source_not_found} == Sources.get_by_url("someotherurl")
   end
 
   test "list/0 lists all sources and list/1 lists sources in an account" do

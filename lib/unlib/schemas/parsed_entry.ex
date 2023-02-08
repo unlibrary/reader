@@ -51,9 +51,10 @@ defmodule UnLib.ParsedEntry do
 
   @spec already_saved?(t()) :: boolean()
   def already_saved?(entry) do
-    case maybe_get(entry) do
-      %Entry{} -> true
-      _ -> false
+    if _entry = maybe_get(entry) do
+      true
+    else
+      false
     end
   end
 

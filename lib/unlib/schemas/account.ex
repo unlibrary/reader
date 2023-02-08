@@ -21,7 +21,7 @@ defmodule UnLib.Account do
       join_through: "users_sources",
       on_replace: :delete
 
-    has_many :read_entries, UnLib.ReadEntry
+    has_many :read_entries, UnLib.ReadEntry, foreign_key: :user_id
 
     timestamps()
   end

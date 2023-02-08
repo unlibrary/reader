@@ -52,7 +52,7 @@ defmodule UnLib.Sources do
   def get(id) do
     Repo.get(Source, id)
     |> case do
-      nil -> {:error, "source not found"}
+      nil -> {:error, :source_not_found}
       source -> {:ok, Repo.preload(source, :entries)}
     end
   end
@@ -63,7 +63,7 @@ defmodule UnLib.Sources do
     |> where(url: ^url)
     |> Repo.one()
     |> case do
-      nil -> {:error, "source not found"}
+      nil -> {:error, :source_not_found}
       source -> {:ok, source}
     end
   end

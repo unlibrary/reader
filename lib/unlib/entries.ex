@@ -18,16 +18,13 @@ defmodule UnLib.Entries do
     |> Repo.insert!()
   end
 
-  @spec list(Source.t()) :: [Entry.t()]
-  @spec list(Account.t()) :: [Entry.t()]
-  def list(source_or_account) do
-    source_or_account
-    |> list_all()
-    |> Enum.reject(& &1.read?)
+  @spec list :: [Entry.t()]
+  def list do
+    Repo.all(Entry)
   end
 
-  @spec list_all(Source.t()) :: [Entry.t()]
-  def list_all(%Source{} = source) do
+  @spec list(Source.t()) :: [Entry.t()]
+  def list(%Source{} = source) do
     Entry
     |> where(source_id: ^source.id)
     |> order_by([e], desc: e.date)
@@ -35,13 +32,21 @@ defmodule UnLib.Entries do
     |> Repo.preload(:source)
   end
 
-  @spec list_all(Account.t()) :: [Entry.t()]
-  def list_all(%Account{} = account) do
+  @spec list(Account.t()) :: [Entry.t()]
+  def list(%Account{} = account) do
     account.sources
     |> Ecto.assoc(:entries)
     |> order_by([e], desc: e.date)
     |> preload(:source)
     |> Repo.all()
+  end
+
+  @spec list_unread(Source.t()) :: [Entry.t()]
+  @spec list_unread(Account.t()) :: [Entry.t()]
+  def list_unread(source_or_account) do
+    source_or_account
+    |> list()
+    |> Enum.reject(& &1.read?)
   end
 
   @spec get(Ecto.UUID.t()) :: {:ok, Entry.t()} | {:error, any()}
@@ -83,7 +88,7 @@ defmodule UnLib.Entries do
 
   defp add_entry_to_read_entries(entry) do
     %ReadEntry{}
-    |> ReadEntry.changeset(entry)
+    |> ReadEntry.changeset(entry |> Map.from_struct())
     |> Repo.insert()
   end
 
@@ -91,7 +96,7 @@ defmodule UnLib.Entries do
   @spec read_all(Source.t()) :: :ok
   def read_all(source_or_account) do
     source_or_account
-    |> list_all()
+    |> list()
     |> Enum.each(&read/1)
   end
 
@@ -121,7 +126,7 @@ defmodule UnLib.Entries do
   @spec unread_all(Source.t()) :: :ok
   def unread_all(source_or_account) do
     source_or_account
-    |> list_all()
+    |> list()
     |> Enum.each(&unread/1)
   end
 
