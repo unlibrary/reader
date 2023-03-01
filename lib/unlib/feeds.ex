@@ -5,6 +5,8 @@ defmodule UnLib.Feeds do
 
   alias UnLib.{Account, Source, Sources, Feeds.Data, ParsedEntry}
 
+  @type finch_response() :: {:ok, Finch.Response.t()} | {:error, any()}
+
   @doc """
   Method to pull new entries for all sources.
 
@@ -34,7 +36,7 @@ defmodule UnLib.Feeds do
     |> save()
   end
 
-  @spec pull(Account.t()) :: Data.t()
+  @spec pull(Account.t()) :: [Data.t()]
   def pull(%Account{} = account) do
     account
     |> Sources.list()
@@ -63,12 +65,14 @@ defmodule UnLib.Feeds do
     |> handle_response(data)
   end
 
+  @spec make_request(String.t()) :: finch_response()
   defp make_request(url) do
     :get
     |> Finch.build(url)
     |> Finch.request(UnLib.Finch)
   end
 
+  @spec handle_response(finch_response(), Data.t()) :: Data.t()
   defp handle_response(response, data) do
     case response do
       {:ok, %Finch.Response{status: 200, body: response_data}} ->
@@ -102,14 +106,19 @@ defmodule UnLib.Feeds do
     entries =
       data.entries
       |> Enum.take(5)
-      |> Enum.reject(&ParsedEntry.already_saved?/1)
-      |> Enum.reject(&ParsedEntry.already_read?/1)
+      |> Enum.reject(&already_read_or_saved?/1)
 
     %Data{data | entries: entries}
   end
 
   def filter(data) do
     data
+  end
+
+  @spec already_read_or_saved?(ParsedEntry.t()) :: boolean()
+  defp already_read_or_saved?(p) do
+    ParsedEntry.already_saved?(p) ||
+      ParsedEntry.already_read?(p)
   end
 
   @spec save(Data.t()) :: Data.t()

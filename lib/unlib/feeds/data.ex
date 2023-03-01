@@ -9,7 +9,7 @@ defmodule UnLib.Feeds.Data do
 
   defstruct xml: nil, entries: [], source: nil, error: nil
 
-  @type t :: %__MODULE__{
+  @type t() :: %__MODULE__{
           :xml => nil | String.t(),
           :entries => list() | [ParsedEntry.t() | Entry.t()],
           :source => Source.t(),

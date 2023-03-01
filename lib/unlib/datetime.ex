@@ -5,9 +5,9 @@ defmodule UnLib.DateTime do
 
   alias UnLib.{DateTime.RFC2822}
 
-  @type rfc822 :: RFC2822.t()
+  @type rfc822() :: RFC2822.t()
 
-  @spec now :: NaiveDateTime.t()
+  @spec now() :: NaiveDateTime.t()
   def now do
     DateTime.utc_now()
     |> DateTime.to_naive()

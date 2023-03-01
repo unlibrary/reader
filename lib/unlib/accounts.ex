@@ -6,7 +6,7 @@ defmodule UnLib.Accounts do
   alias UnLib.{Repo, Account}
   alias UnLib.{Auth}
 
-  @type create_opts :: [
+  @type create_opts() :: [
           email: String.t()
         ]
 

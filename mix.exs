@@ -12,7 +12,7 @@ defmodule UnLib.MixProject do
       elixir: "~> 1.12",
       start_permanent: @mix_env == :prod,
       elixirc_paths: elixirc_paths(Mix.env()),
-      deps: deps() ++ test_deps(),
+      deps: deps() ++ check_deps(),
       aliases: aliases()
     ]
   end
@@ -40,11 +40,11 @@ defmodule UnLib.MixProject do
     ]
   end
 
-  defp test_deps do
+  defp check_deps do
     [
-      {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
-      {:dialyxir, "~> 1.1", only: [:dev], runtime: false},
-      {:ex_check, "~> 0.14.0", only: [:dev], runtime: false}
+      {:ex_check, "~> 0.14.0", only: [:dev], runtime: false},
+      {:credo, ">= 0.0.0", only: [:dev], runtime: false},
+      {:dialyxir, ">= 0.0.0", only: [:dev], runtime: false}
     ]
   end
 

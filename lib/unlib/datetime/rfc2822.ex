@@ -8,7 +8,7 @@ defmodule UnLib.DateTime.RFC2822 do
   License: https://github.com/lau/calendar/blob/master/LICENSE
   """
 
-  @type t :: String.t()
+  @type t() :: String.t()
 
   @spec parse(t()) :: {:ok, NaiveDateTime.t()} | {:error, any()}
   def parse(string) do

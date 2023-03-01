@@ -1,5 +1,6 @@
 defmodule UnLib.Vault do
   @moduledoc false
+
   use Cloak.Vault, otp_app: :unlib
 
   @impl GenServer

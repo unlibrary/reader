@@ -10,14 +10,14 @@ defmodule UnLib.ParsedEntry do
 
   defstruct [:date, :title, :body, :url]
 
-  @type t :: %ParsedEntry{
+  @type t() :: %ParsedEntry{
           date: DateTime.rfc822(),
           title: String.t(),
           body: String.t(),
           url: String.t()
         }
 
-  @type rss_entry :: %{String.t() => String.t()}
+  @type rss_entry() :: %{String.t() => String.t()}
 
   @spec from(rss_entry()) :: t()
   def from(%{
