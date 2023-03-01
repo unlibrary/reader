@@ -6,14 +6,15 @@ defmodule UnLib.MixProject do
   def project do
     [
       name: "Unlibrary",
-      source_url: "https://github.com/unlibrary/reader",
+      source_url: "https://github.com/libre0b11/unlib",
       app: :unlib,
       version: "0.1.0",
       elixir: "~> 1.12",
       start_permanent: @mix_env == :prod,
       elixirc_paths: elixirc_paths(Mix.env()),
       deps: deps() ++ check_deps(),
-      aliases: aliases()
+      aliases: aliases(),
+      package: package()
     ]
   end
 
@@ -60,4 +61,12 @@ defmodule UnLib.MixProject do
 
   defp elixirc_paths(:test), do: ["lib", "test/support"]
   defp elixirc_paths(_), do: ["lib"]
+
+  defp package do
+    [
+      maintainers: ["Robin Boers"],
+      organization: "0b11",
+      links: %{github: "https://github.com/libre0b11/unlib"}
+    ]
+  end
 end
