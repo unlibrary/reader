@@ -88,11 +88,8 @@ defmodule UnLib.Feeds do
 
   @spec parse(Data.t()) :: Data.t()
   def parse(data) when is_nil(data.error) do
-    {:ok, parsed_xml} = FastRSS.parse(data.xml)
-
-    entries =
-      parsed_xml["items"]
-      |> Enum.map(&ParsedEntry.from/1)
+    parsed_xml = ElixirFeedParser.parse(data.xml)
+    entries = Enum.map(parsed_xml.entries, &ParsedEntry.from/1)
 
     %Data{data | entries: entries}
   end

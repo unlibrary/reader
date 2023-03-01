@@ -9,20 +9,20 @@ defmodule EntriesTest do
 
   test "ParsedEntry.from/1 converts parsed rss entry to struct" do
     rss_entry = %{
-      "pub_date" => "Sat, 28 Jan 2023 17:05:40 +0100",
-      "title" => "Smartphones verbieden in de klas: niet de oplossing",
-      "content" => nil,
-      "description" =>
+      updated: "Sat, 28 Jan 2023 17:05:40 +0100",
+      title: "Smartphones verbieden in de klas: niet de oplossing",
+      content: nil,
+      description:
         "Ik zat gisteren een fragment van de avondshow van Arjen Lubach te kijken met de naam &ldquo;En nou is het afgelopen met telefoons in de klas&rdquo;. Ik moet zeggen dat ik het vaak met Arjen Lubach eens ben, maar dit stond toch echt lijnrecht tegenover mijn eigen mening. Het standpunt van Arjen is dat smartphones landelijk verboden zouden moeten worden op school. En ik ben het er niet (helemaal) mee eens.",
-      "link" => "https://blog.geheimesite.nl/post/smartphones-in-de-klas/"
+      url: "https://blog.geheimesite.nl/post/smartphones-in-de-klas/"
     }
 
     %ParsedEntry{date: date, title: title, body: body, url: url} = ParsedEntry.from(rss_entry)
 
-    assert date == rss_entry["pub_date"]
-    assert title == rss_entry["title"]
-    assert body == rss_entry["description"]
-    assert url == rss_entry["link"]
+    assert date == rss_entry.updated
+    assert title == rss_entry.title
+    assert body == rss_entry.description
+    assert url == rss_entry.url
   end
 
   test "get/1 returns entry by id" do

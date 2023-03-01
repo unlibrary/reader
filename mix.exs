@@ -19,7 +19,7 @@ defmodule UnLib.MixProject do
 
   def application do
     [
-      extra_applications: [:logger],
+      extra_applications: [:logger, :elixir_feed_parser],
       mod: {UnLib.Application, []}
     ]
   end
@@ -34,7 +34,7 @@ defmodule UnLib.MixProject do
       {:jason, "~> 1.2"},
       {:finch, "~> 0.13"},
       {:bcrypt_elixir, "~> 2.3.0"},
-      {:fast_rss, github: "RobinBoers/fast_rss"},
+      {:elixir_feed_parser, "~> 0.0.1"},
       {:ex_doc, "~> 0.24", only: :dev, runtime: false},
       {:the_big_username_blacklist, "~> 0.1.2"}
     ]

@@ -17,28 +17,22 @@ defmodule UnLib.ParsedEntry do
           url: String.t()
         }
 
-  @type rss_entry() :: %{String.t() => String.t()}
+  @type rss_entry() :: %{
+          updated: String.t(),
+          published: String.t(),
+          title: String.t(),
+          content: String.t(),
+          description: String.t(),
+          url: String.t()
+        }
 
   @spec from(rss_entry()) :: t()
-  def from(%{
-        "pub_date" => pub_date,
-        "title" => title,
-        "content" => content,
-        "description" => description,
-        "link" => link
-      }) do
-    body =
-      if content do
-        content
-      else
-        description
-      end
-
+  def from(rss_entry) do
     %ParsedEntry{
-      date: pub_date,
-      title: title,
-      body: body,
-      url: link
+      date: rss_entry[:published] || rss_entry[:updated],
+      title: rss_entry[:title],
+      body: rss_entry[:content] || rss_entry[:description],
+      url: rss_entry[:url]
     }
   end
 
