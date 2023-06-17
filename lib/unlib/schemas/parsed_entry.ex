@@ -74,6 +74,7 @@ defmodule UnLib.ParsedEntry do
       case DateTime.detect_format(entry.datetime) do
         :rfc2822 -> DateTime.from_rfc2822(entry.datetime)
         :rfc3339 -> DateTime.from_rfc3339(entry.datetime)
+        :unknown -> DateTime.now()
       end
 
     Entries.new(source, datetime, entry.title, entry.body, entry.url)

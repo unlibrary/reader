@@ -30,12 +30,16 @@ defmodule UnLib.DateTime do
   Given either aRFC2822 or a RFC3339 datetime string, detect which format is used.
   """
   @spec detect_format(rfc2822() | rfc3339()) :: :rfc2822 | :rfc3339
-  def detect_format(datetime_string) do
+  def detect_format(datetime_string) when is_binary(datetime_string) do
     if String.contains?(datetime_string, " ") do
       :rfc2822
     else
       :rfc3339
     end
+  end
+
+  def detect_format(_datetime_string) do
+    :unknown
   end
 
   @doc """
