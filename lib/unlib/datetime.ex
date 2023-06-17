@@ -29,7 +29,7 @@ defmodule UnLib.DateTime do
   @doc """
   Given either aRFC2822 or a RFC3339 datetime string, detect which format is used.
   """
-  @spec detect_format(rfc2822() | rfc3339()) :: :rfc2822 | :rfc3339
+  @spec detect_format(rfc2822() | rfc3339()) :: :rfc2822 | :rfc3339 | :unknown
   def detect_format(datetime_string) when is_binary(datetime_string) do
     if String.contains?(datetime_string, " ") do
       :rfc2822
@@ -53,10 +53,9 @@ defmodule UnLib.DateTime do
   @doc """
   Convert a valid RFC2822 string to a `NaiveDateTime` struct.
   """
-  @spec from_rfc2822(rfc2822()) :: NaiveDateTime.t()
+  @spec from_rfc2822(rfc2822()) :: {:ok, NaiveDateTime.t()} | {:error, any()}
   def from_rfc2822(datetime_string) do
-    {:ok, datetime} = RFC2822.parse(datetime_string)
-    datetime
+    RFC2822.parse(datetime_string)
   end
 
   @doc """
@@ -70,9 +69,8 @@ defmodule UnLib.DateTime do
   @doc """
   Convert a valid RFC3339 string to a `NaiveDateTime` struct.
   """
-  @spec from_rfc3339(rfc3339()) :: NaiveDateTime.t()
+  @spec from_rfc3339(rfc3339()) :: {:ok, NaiveDateTime.t()} | {:error, any()}
   def from_rfc3339(datetime_string) do
-    {:ok, datetime} = RFC3339.parse(datetime_string)
-    datetime
+    RFC3339.parse(datetime_string)
   end
 end

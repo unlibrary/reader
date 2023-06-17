@@ -66,7 +66,7 @@ defmodule SourcesTest do
 
     sources = Sources.list(user)
     assert is_list(sources)
-    assert length(sources) == @amount_of_entries_to_save
+    assert length(sources) == 5
   end
 
   test "add/2 adds source to account and remove/2 removes it" do

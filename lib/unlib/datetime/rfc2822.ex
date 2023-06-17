@@ -12,20 +12,23 @@ defmodule UnLib.DateTime.RFC2822 do
 
   @spec parse(t()) :: {:ok, NaiveDateTime.t()} | {:error, any()}
   def parse(string) do
-    cap = Regex.named_captures(rfc2822_regex(), string)
-    month_number = number_for_month(cap["month"])
+    if cap = Regex.named_captures(rfc2822_regex(), string) do
+      month_number = number_for_month(cap["month"])
 
-    NaiveDateTime.from_erl(
-      {{cap["year"] |> to_int, month_number, cap["day"] |> to_int},
-       {cap["hour"] |> to_int, cap["min"] |> to_int, cap["sec"] |> to_int}}
-    )
+      NaiveDateTime.from_erl(
+        {{cap["year"] |> to_int, month_number, cap["day"] |> to_int},
+         {cap["hour"] |> to_int, cap["min"] |> to_int, cap["sec"] |> to_int}}
+      )
+    else
+      {:error, :bad_format}
+    end
   end
 
   defp rfc2822_regex do
     ~r/(?<day>[\d]{1,2})[\s]+(?<month>[^\d]{3})[\s]+(?<year>[\d]{4})[\s]+(?<hour>[\d]{2})[^\d]?(?<min>[\d]{2})[^\d]?(?<sec>[\d]{2})[^\d]?(((?<offset_sign>[+-])(?<offset_hours>[\d]{2})(?<offset_mins>[\d]{2})|(?<offset_letters>[A-Z]{1,3})))?/
   end
 
-  defp number_for_month(string) do
+  defp number_for_month(string) when is_binary(string) do
     string
     |> String.downcase()
     |> month_number()

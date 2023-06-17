@@ -71,13 +71,21 @@ defmodule UnLib.ParsedEntry do
   @spec save(Source.t(), t()) :: Entry.t()
   def save(source, entry) do
     datetime =
-      case DateTime.detect_format(entry.datetime) do
-        :rfc2822 -> DateTime.from_rfc2822(entry.datetime)
-        :rfc3339 -> DateTime.from_rfc3339(entry.datetime)
-        :unknown -> DateTime.now()
+      case parse_datetime(entry.datetime) do
+        {:ok, datetime} -> datetime
+        {:error, _error} -> DateTime.now()
       end
 
     Entries.new(source, datetime, entry.title, entry.body, entry.url)
+  end
+
+  @spec parse_datetime(String.t()) :: {:ok, NaiveDateTime.t()} | {:error, any()}
+  defp parse_datetime(datetime_string) do
+    case DateTime.detect_format(datetime_string) do
+      :rfc2822 -> DateTime.from_rfc2822(datetime_string)
+      :rfc3339 -> DateTime.from_rfc3339(datetime_string)
+      :unknown -> {:ok, DateTime.now()}
+    end
   end
 
   @doc """

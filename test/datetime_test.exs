@@ -19,13 +19,13 @@ defmodule DateTimeTest do
     datetime = DateTime.now()
     rfc_2822_datetime = DateTime.to_rfc2822(datetime)
 
-    assert DateTime.from_rfc2822(rfc_2822_datetime) == datetime
+    assert DateTime.from_rfc2822(rfc_2822_datetime) == {:ok, datetime}
   end
 
   test "to_rfc3339/1 and from_rfc3339/1 work" do
     datetime = DateTime.now()
     rfc_3339_datetime = DateTime.to_rfc3339(datetime)
 
-    assert DateTime.from_rfc3339(rfc_3339_datetime) == datetime
+    assert DateTime.from_rfc3339(rfc_3339_datetime) == {:ok, datetime}
   end
 end
