@@ -95,8 +95,7 @@ defmodule UnLib.Entries do
     |> Repo.insert()
   end
 
-  @spec read_all(Account.t()) :: :ok
-  @spec read_all(Source.t()) :: :ok
+  @spec read_all(Source.t() | Account.t()) :: :ok
   def read_all(source_or_account) do
     source_or_account
     |> list()
@@ -127,8 +126,7 @@ defmodule UnLib.Entries do
     |> Repo.delete()
   end
 
-  @spec unread_all(Account.t()) :: :ok
-  @spec unread_all(Source.t()) :: :ok
+  @spec unread_all(Source.t() | Account.t()) :: :ok
   def unread_all(source_or_account) do
     source_or_account
     |> list()

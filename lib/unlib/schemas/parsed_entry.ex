@@ -31,7 +31,7 @@ defmodule UnLib.ParsedEntry do
     %ParsedEntry{
       datetime: rss_entry[:published] || rss_entry[:updated],
       title: rss_entry[:title],
-      body: rss_entry[:content] || rss_entry[:description],
+      body: rss_entry[:content] || rss_entry[:description] || rss_entry[:url],
       url: rss_entry[:url]
     }
   end
