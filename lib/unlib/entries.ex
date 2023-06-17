@@ -33,8 +33,12 @@ defmodule UnLib.Entries do
   end
 
   @spec list(Account.t()) :: [Entry.t()]
-  def list(%Account{} = account) do
-    account.sources
+  def list(%Account{sources: []}) do
+    []
+  end
+
+  def list(%Account{sources: sources}) do
+    sources
     |> Ecto.assoc(:entries)
     |> order_by([e], desc: e.date)
     |> preload(:source)
@@ -51,8 +55,7 @@ defmodule UnLib.Entries do
 
   @spec get(Ecto.UUID.t()) :: {:ok, Entry.t()} | {:error, any()}
   def get(id) do
-    Repo.get(Entry, id)
-    |> case do
+    case Repo.get(Entry, id) do
       nil -> {:error, :entry_not_found}
       entry -> {:ok, Repo.preload(entry, :source)}
     end
