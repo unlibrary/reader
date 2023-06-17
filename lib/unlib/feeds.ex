@@ -3,9 +3,9 @@ defmodule UnLib.Feeds do
   Manages pulling, parsing and diffing feeds.
   """
 
-  @amount_of_entries_to_save 20
-
   alias UnLib.{Account, Source, Sources, Feeds.Data, ParsedEntry}
+
+  @amount_of_entries_to_save 20
 
   @type finch_response() :: {:ok, Finch.Response.t()} | {:error, any()}
 
@@ -90,10 +90,18 @@ defmodule UnLib.Feeds do
 
   @spec parse(Data.t()) :: Data.t()
   def parse(data) when is_nil(data.error) do
-    parsed_xml = ElixirFeedParser.parse(data.xml)
-    entries = Enum.map(parsed_xml.entries, &ParsedEntry.from/1)
+    # `:xmerl` throws an `:exit` when it encounters malformed XML.
+    # This is here to handle those errors gracefully.
 
-    %Data{data | entries: entries}
+    try do
+      parsed_xml = ElixirFeedParser.parse(data.xml)
+      entries = Enum.map(parsed_xml.entries, &ParsedEntry.from/1)
+
+      %Data{data | entries: entries}
+    catch
+      :exit, _ ->
+        %Data{data | error: "parsing feed failed for #{data.source.name} due to malformed XML"}
+    end
   end
 
   def parse(data) do
