@@ -16,10 +16,21 @@ defmodule UnLib.Sources do
       name: name,
       url: url,
       type: type,
-      icon: get_icon(url),
-      validate_required: true
+      icon: get_icon(url)
     })
     |> Repo.insert_or_update()
+  end
+
+  @spec update(Source.t(), String.t(), String.t(), String.t()) ::
+          {:ok, Source.t()} | {:error, any()}
+  def update(source, url, type, name) do
+    Source.changeset(source, %{
+      name: name,
+      url: url,
+      type: type,
+      icon: get_icon(url)
+    })
+    |> Repo.update()
   end
 
   defp maybe_get_existing_source(url) do
@@ -27,7 +38,7 @@ defmodule UnLib.Sources do
       {:ok, source} ->
         source
 
-      {:error, _} ->
+      {:error, _error} ->
         %Source{}
     end
   end
@@ -50,7 +61,7 @@ defmodule UnLib.Sources do
     |> Repo.all()
   end
 
-  @spec get(Ecto.UUID.t()) :: {:ok, Source.t()} | {:error, any()}
+  @spec get(Ecto.UUID.t()) :: {:ok, Source.t()} | {:error, :source_not_found}
   def get(id) do
     Repo.get(Source, id)
     |> case do
@@ -59,7 +70,7 @@ defmodule UnLib.Sources do
     end
   end
 
-  @spec get_by_url(String.t()) :: {:ok, Source.t()} | {:error, any()}
+  @spec get_by_url(String.t()) :: {:ok, Source.t()} | {:error, :source_not_found}
   def get_by_url(url) do
     Source
     |> where(url: ^url)

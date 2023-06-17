@@ -24,8 +24,17 @@ defmodule SourcesTest do
     assert {:error, :source_not_found} == Sources.get(Ecto.UUID.generate())
   end
 
+  test "update/4 updates a source" do
+    {:ok, %Source{id: id, name: "ye"} = s} = Sources.new(valid_feed_url(), :rss, "ye")
+    {:ok, %Source{id: ^id, name: "yo"}} = Sources.update(s, valid_feed_url(), :rss, "yo")
+  end
+
   test "new/3 updates source if it exists and get_by_url/1 works" do
-    {:ok, %Source{id: id, name: "ye"}} = Sources.new(valid_feed_url(), :rss, "ye")
+    {:ok, %Source{id: id, name: "ye"} = s} = Sources.new(valid_feed_url(), :rss, "ye")
+
+    {:ok, source} = Sources.get_by_url(valid_feed_url())
+    assert source == s
+
     {:ok, %Source{id: ^id, name: "yo"} = s} = Sources.new(valid_feed_url(), :rss, "yo")
 
     {:ok, source} = Sources.get_by_url(valid_feed_url())
