@@ -3,6 +3,8 @@ defmodule UnLib.Feeds do
   Manages pulling, parsing and diffing feeds.
   """
 
+  @amount_of_entries_to_save 20
+
   alias UnLib.{Account, Source, Sources, Feeds.Data, ParsedEntry}
 
   @type finch_response() :: {:ok, Finch.Response.t()} | {:error, any()}
@@ -102,14 +104,24 @@ defmodule UnLib.Feeds do
   def filter(data) when is_nil(data.error) do
     entries =
       data.entries
-      |> Enum.take(5)
+      |> Enum.take(@amount_of_entries_to_save)
+      |> Enum.reduce([], &remove_duplicates/2)
       |> Enum.reject(&already_read_or_saved?/1)
 
     %Data{data | entries: entries}
   end
 
-  def filter(data) do
-    data
+  # This function filters out multiple entries with the same
+  # URL. I don't think the RSS spec allows it, but it happened in
+  # one of the feeds I was following.
+  #
+  # Currently, we keep the first entry, and all later entries with
+  # the same URL are discarded.
+  def remove_duplicates(parsed_entry, acc) do
+    case List.keyfind(acc, :url, parsed_entry[:url]) do
+      nil -> [parsed_entry | acc]
+      _ -> acc
+    end
   end
 
   @spec already_read_or_saved?(ParsedEntry.t()) :: boolean()

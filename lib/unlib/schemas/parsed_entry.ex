@@ -29,11 +29,33 @@ defmodule UnLib.ParsedEntry do
   @spec from(rss_entry()) :: t()
   def from(rss_entry) do
     %ParsedEntry{
-      datetime: rss_entry[:published] || rss_entry[:updated],
-      title: rss_entry[:title],
-      body: rss_entry[:content] || rss_entry[:description] || rss_entry[:url],
+      datetime: get_datetime(rss_entry),
+      title: get_title(rss_entry),
+      body: get_content(rss_entry),
       url: rss_entry[:url]
     }
+  end
+
+  defp get_datetime(rss_entry) do
+    rss_entry[:published] || rss_entry[:updated]
+  end
+
+  defp get_title(rss_entry) do
+    rss_entry[:title] || (get_content(rss_entry) |> truncate())
+  end
+
+  defp get_content(rss_entry) do
+    rss_entry[:content] || rss_entry[:description] || rss_entry[:url]
+  end
+
+  defp truncate(string, opts \\ []) do
+    length = Keyword.get(opts, :length, 12)
+
+    cond do
+      not String.valid?(string) -> string
+      String.length(string) < length -> string
+      true -> String.slice(string, 0..length) <> "..."
+    end
   end
 
   @spec save(Source.t(), t()) :: Entry.t()
@@ -49,7 +71,7 @@ defmodule UnLib.ParsedEntry do
 
   @spec already_saved?(t()) :: boolean()
   def already_saved?(entry) do
-    maybe_get(entry) !== nil
+    maybe_get_entry_by_url(entry) !== nil
   end
 
   @spec already_read?(t()) :: boolean()
@@ -62,8 +84,8 @@ defmodule UnLib.ParsedEntry do
     maybe_get_read_entry(parsed_entry) !== nil
   end
 
-  @spec maybe_get(t()) :: Entry.t() | nil
-  defp maybe_get(%ParsedEntry{url: entry_url}) do
+  @spec maybe_get_entry_by_url(t()) :: Entry.t() | nil
+  defp maybe_get_entry_by_url(%ParsedEntry{url: entry_url}) do
     Entry
     |> where(url: ^entry_url)
     |> Repo.one()
