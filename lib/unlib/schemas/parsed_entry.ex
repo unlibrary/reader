@@ -1,6 +1,10 @@
 defmodule UnLib.ParsedEntry do
   @moduledoc """
   Struct representing a parsed RSS entry.
+
+  The `ParsedEntry` struct is an intermediate representation. It is used to
+  easily digest the output of `ElixirFeedParser`, before it is saved to
+  the database.
   """
 
   alias UnLib.{Repo, Source, Entry, ReadEntry, ParsedEntry}
@@ -26,6 +30,9 @@ defmodule UnLib.ParsedEntry do
           url: String.t()
         }
 
+  @doc """
+  Creates an `ParsedEntry` struct from the output of `ElixirFeedParser`.
+  """
   @spec from(rss_entry()) :: t()
   def from(rss_entry) do
     %ParsedEntry{
@@ -41,7 +48,7 @@ defmodule UnLib.ParsedEntry do
   end
 
   defp get_title(rss_entry) do
-    rss_entry[:title] || (get_content(rss_entry) |> truncate())
+    rss_entry[:title] || get_content(rss_entry) |> truncate()
   end
 
   defp get_content(rss_entry) do
@@ -58,6 +65,9 @@ defmodule UnLib.ParsedEntry do
     end
   end
 
+  @doc """
+  Persists a `ParsedEntry` to the database as an `Entry`.
+  """
   @spec save(Source.t(), t()) :: Entry.t()
   def save(source, entry) do
     datetime =
@@ -69,11 +79,17 @@ defmodule UnLib.ParsedEntry do
     Entries.new(source, datetime, entry.title, entry.body, entry.url)
   end
 
+  @doc """
+  Checks if a `ParsedEntry` already has an `Entry` counterpart in the database.
+  """
   @spec already_saved?(t()) :: boolean()
   def already_saved?(entry) do
     maybe_get_entry_by_url(entry) !== nil
   end
 
+  @doc """
+  Checks if a `ParsedEntry` already as a `ReadEntry` counterpart in the database.
+  """
   @spec already_read?(t()) :: boolean()
   def already_read?(entry) do
     in_read_entries?(entry)
@@ -92,7 +108,7 @@ defmodule UnLib.ParsedEntry do
   end
 
   @spec maybe_get_read_entry(t()) :: ReadEntry.t() | nil
-  def maybe_get_read_entry(%ParsedEntry{url: entry_url}) do
+  defp maybe_get_read_entry(%ParsedEntry{url: entry_url}) do
     ReadEntry
     |> where(url: ^entry_url)
     |> Repo.one()

@@ -6,6 +6,8 @@ defmodule FeedsTest do
 
   alias UnLib.{Accounts, Sources, Feeds, Entries}
 
+  @amount_of_entries_to_save 20
+
   test "Feeds.Data.from generates Feeds.Data struct with source" do
     {:ok, source} = Sources.new(valid_feed_url(), :rss)
 
@@ -23,7 +25,7 @@ defmodule FeedsTest do
     _data = Feeds.pull(source)
 
     source_entries = Entries.list_unread(source)
-    assert length(source_entries) == 5
+    assert length(source_entries) == @amount_of_entries_to_save
   end
 
   test "pull/1 pulls feeds for a single account" do
@@ -36,7 +38,7 @@ defmodule FeedsTest do
     _data = Feeds.pull(user)
 
     user_entries = Entries.list_unread(user)
-    assert length(user_entries) == 5
+    assert length(user_entries) == @amount_of_entries_to_save
   end
 
   test "pull/0 pulls everything" do
@@ -45,7 +47,7 @@ defmodule FeedsTest do
     _data = Feeds.pull()
 
     total_entries = Entries.list()
-    assert length(total_entries) == 5
+    assert length(total_entries) == @amount_of_entries_to_save
   end
 
   test "pull/0 errors on invalid URL" do
@@ -76,12 +78,12 @@ defmodule FeedsTest do
     _data = Feeds.pull(source)
 
     source_entries = Entries.list(source)
-    assert length(source_entries) == 5
+    assert length(source_entries) == @amount_of_entries_to_save
 
     _data = Feeds.pull(source)
 
     source_entries = Entries.list(source)
-    assert length(source_entries) == 5
+    assert length(source_entries) == @amount_of_entries_to_save
   end
 
   test "pull skips read entries" do
@@ -90,7 +92,7 @@ defmodule FeedsTest do
     _data = Feeds.pull(source)
 
     source_entries = Entries.list(source)
-    assert length(source_entries) == 5
+    assert length(source_entries) == @amount_of_entries_to_save
 
     :ok = Entries.read_all(source)
     :ok = Entries.prune(source)
@@ -110,7 +112,7 @@ defmodule FeedsTest do
     _data = Feeds.pull(source)
 
     source_entries = Entries.list(source)
-    assert length(source_entries) == 5
+    assert length(source_entries) == @amount_of_entries_to_save
 
     entry = hd(source_entries)
     {:ok, _entry} = Entries.read(entry)
@@ -123,6 +125,6 @@ defmodule FeedsTest do
     _data = Feeds.pull(source)
 
     source_entries = Entries.list(source)
-    assert length(source_entries) == 4
+    assert length(source_entries) == @amount_of_entries_to_save - 1
   end
 end

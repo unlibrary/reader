@@ -7,6 +7,8 @@ defmodule EntriesTest do
   alias UnLib.{Entry, ParsedEntry}
   alias UnLib.{Accounts, Sources, Entries}
 
+  @amount_of_entries_to_save 20
+
   test "ParsedEntry.from/1 converts parsed rss entry to struct" do
     rss_entry = %{
       updated: "Sat, 28 Jan 2023 17:05:40 +0100",
@@ -62,7 +64,7 @@ defmodule EntriesTest do
     populate_db_with_entries()
     source_entries = Entries.list_unread(source)
 
-    assert length(source_entries) == 5
+    assert length(source_entries) == @amount_of_entries_to_save
 
     {:ok, user} = Sources.add(source, user)
     user_entries = Entries.list_unread(user)
@@ -77,12 +79,12 @@ defmodule EntriesTest do
     populate_db_with_entries()
     source_entries = Entries.list_unread(source)
 
-    assert length(source_entries) == 5
+    assert length(source_entries) == @amount_of_entries_to_save
 
     {:ok, %Entry{read?: true}} = UnLib.Entries.read(hd(source_entries))
 
     source_entries = Entries.list_unread(source)
-    assert length(source_entries) == 4
+    assert length(source_entries) == @amount_of_entries_to_save - 1
 
     {:ok, user} = Sources.add(source, user)
     user_entries = Entries.list_unread(user)
@@ -97,12 +99,12 @@ defmodule EntriesTest do
     populate_db_with_entries()
     source_entries = Entries.list_unread(source)
 
-    assert length(source_entries) == 5
+    assert length(source_entries) == @amount_of_entries_to_save
 
     {:ok, %Entry{read?: true}} = UnLib.Entries.read(hd(source_entries))
 
     source_entries = Entries.list(source)
-    assert length(source_entries) == 5
+    assert length(source_entries) == @amount_of_entries_to_save
 
     {:ok, user} = Sources.add(source, user)
     user_entries = Entries.list(user)
@@ -116,7 +118,7 @@ defmodule EntriesTest do
     populate_db_with_entries()
     source_entries = Entries.list(source)
 
-    assert length(source_entries) == 5
+    assert length(source_entries) == @amount_of_entries_to_save
 
     :ok = UnLib.Entries.read_all(source)
 
@@ -130,14 +132,14 @@ defmodule EntriesTest do
     populate_db_with_entries()
     source_entries = Entries.list(source)
 
-    assert length(source_entries) == 5
+    assert length(source_entries) == @amount_of_entries_to_save
 
     {:ok, %Entry{read?: true}} = UnLib.Entries.read(hd(source_entries))
 
     :ok = UnLib.Entries.prune(source)
 
     source_entries = Entries.list(source)
-    assert length(source_entries) == 4
+    assert length(source_entries) == @amount_of_entries_to_save - 1
   end
 
   test "prune/1 deletes read entries in account" do
@@ -150,14 +152,14 @@ defmodule EntriesTest do
     populate_db_with_entries()
     user_entries = Entries.list(user)
 
-    assert length(user_entries) == 5
+    assert length(user_entries) == @amount_of_entries_to_save
 
     {:ok, %Entry{read?: true}} = UnLib.Entries.read(hd(user_entries))
 
     :ok = UnLib.Entries.prune(user)
 
     user_entries = Entries.list(user)
-    assert length(user_entries) == 4
+    assert length(user_entries) == @amount_of_entries_to_save - 1
   end
 
   test "delete/1 deletes a single entry by id or entry struct" do
@@ -165,14 +167,14 @@ defmodule EntriesTest do
 
     populate_db_with_entries()
     source_entries = Entries.list_unread(source)
-    assert length(source_entries) == 5
+    assert length(source_entries) == @amount_of_entries_to_save
 
     [entry1, entry2 | _rest] = source_entries
     :ok = Entries.delete(entry1)
     :ok = Entries.delete(entry2.id)
 
     source_entries = Entries.list(source)
-    assert length(source_entries) == 3
+    assert length(source_entries) == @amount_of_entries_to_save - 2
   end
 
   test "delete_all/1 deletes all entries in source" do
@@ -181,7 +183,7 @@ defmodule EntriesTest do
     populate_db_with_entries()
     source_entries = Entries.list(source)
 
-    assert length(source_entries) == 5
+    assert length(source_entries) == @amount_of_entries_to_save
 
     :ok = UnLib.Entries.delete_all(source)
 
@@ -199,7 +201,7 @@ defmodule EntriesTest do
     populate_db_with_entries()
     user_entries = Entries.list(user)
 
-    assert length(user_entries) == 5
+    assert length(user_entries) == @amount_of_entries_to_save
 
     :ok = UnLib.Entries.delete_all(user)
 
@@ -212,7 +214,7 @@ defmodule EntriesTest do
 
     populate_db_with_entries()
     source_entries = Entries.list_unread(source)
-    assert length(source_entries) == 5
+    assert length(source_entries) == @amount_of_entries_to_save
 
     entry = hd(source_entries)
     {:ok, entry} = Entries.read(entry)
@@ -225,7 +227,7 @@ defmodule EntriesTest do
     :ok = UnLib.Entries.prune(source)
 
     source_entries = Entries.list(source)
-    assert length(source_entries) == 5
+    assert length(source_entries) == @amount_of_entries_to_save
   end
 
   test "unread_all/1 marks all entries as unread" do
@@ -233,7 +235,7 @@ defmodule EntriesTest do
 
     populate_db_with_entries()
     source_entries = Entries.list_unread(source)
-    assert length(source_entries) == 5
+    assert length(source_entries) == @amount_of_entries_to_save
 
     entry = hd(source_entries)
     {:ok, entry} = Entries.read(entry)
@@ -243,6 +245,6 @@ defmodule EntriesTest do
     :ok = Entries.unread_all(source)
 
     unread_entries = Entries.list_unread(source)
-    assert length(unread_entries) == 5
+    assert length(unread_entries) == @amount_of_entries_to_save
   end
 end

@@ -1,6 +1,16 @@
 defmodule UnLib.Sources do
   @moduledoc """
   Manages sources for an user.
+
+  A source is a feed you follow. Multiple users can follow the same feeds,
+  which will be the same source in the database.
+
+  Sources can be created and then added to an account. Sources that aren't added to
+  any accounts won't be pulled.
+
+  > Warning:
+  > There is one design flaw: if multiple accounts follow the same feed, and
+  one user changes its name, it will change for all users.
   """
 
   alias UnLib.{Repo, Source, Account}
@@ -8,6 +18,12 @@ defmodule UnLib.Sources do
 
   @type type() :: :rss | :atom | :mf2
 
+  @doc """
+  Creates a new source.
+
+  Inserts the source if it doesn't exist yet, otherwise
+  updates the existing source.
+  """
   @spec new(String.t(), type(), String.t() | nil) :: {:ok, Source.t()} | {:error, any()}
   def new(url, type, name \\ nil) do
     base_source = maybe_get_existing_source(url)
@@ -21,6 +37,9 @@ defmodule UnLib.Sources do
     |> Repo.insert_or_update()
   end
 
+  @doc """
+  Updates a source.
+  """
   @spec update(Source.t(), String.t(), String.t(), String.t()) ::
           {:ok, Source.t()} | {:error, any()}
   def update(source, url, type, name) do
@@ -48,11 +67,17 @@ defmodule UnLib.Sources do
     "#{scheme}://#{host}/favicon.ico"
   end
 
+  @doc """
+  Lists all sources in the database.
+  """
   @spec list() :: [Source.t()]
   def list do
     Repo.all(Source)
   end
 
+  @doc """
+  Lists all sources in an account.
+  """
   @spec list(Account.t()) :: [Source.t()]
   def list(account) do
     account
@@ -61,6 +86,9 @@ defmodule UnLib.Sources do
     |> Repo.all()
   end
 
+  @doc """
+  Gets a source by ID.
+  """
   @spec get(Ecto.UUID.t()) :: {:ok, Source.t()} | {:error, :source_not_found}
   def get(id) do
     Repo.get(Source, id)
@@ -70,6 +98,9 @@ defmodule UnLib.Sources do
     end
   end
 
+  @doc """
+  Gets a source by URL.
+  """
   @spec get_by_url(String.t()) :: {:ok, Source.t()} | {:error, :source_not_found}
   def get_by_url(url) do
     Source
@@ -81,6 +112,9 @@ defmodule UnLib.Sources do
     end
   end
 
+  @doc """
+  Adds a source to an account.
+  """
   @spec add(Source.t(), Account.t()) :: {:ok, Account.t()} | {:error, any()}
   def add(source, user) do
     sources = user.sources
@@ -95,6 +129,9 @@ defmodule UnLib.Sources do
     end
   end
 
+  @doc """
+  Removes a source from an account.
+  """
   @spec remove(Source.t(), Account.t()) :: {:ok, Account.t()} | {:error, any()}
   def remove(source, user) do
     sources = user.sources

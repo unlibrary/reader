@@ -7,6 +7,8 @@ defmodule SourcesTest do
   alias UnLib.{Account, Source}
   alias UnLib.{Accounts, Sources}
 
+  @amount_of_entries_to_save 20
+
   test "new/3 returns source struct" do
     {:ok, %Source{}} = Sources.new(valid_feed_url(), :rss)
   end
@@ -64,7 +66,7 @@ defmodule SourcesTest do
 
     sources = Sources.list(user)
     assert is_list(sources)
-    assert length(sources) == 5
+    assert length(sources) == @amount_of_entries_to_save
   end
 
   test "add/2 adds source to account and remove/2 removes it" do

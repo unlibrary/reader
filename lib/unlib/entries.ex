@@ -7,6 +7,9 @@ defmodule UnLib.Entries do
 
   import Ecto.Query
 
+  @doc """
+  Creates a new entry.
+  """
   @spec new(Source.t(), NaiveDateTime.t(), String.t(), String.t(), String.t()) :: Entry.t()
   def new(source, date, title, body, url) do
     Ecto.build_assoc(source, :entries, %{
@@ -18,11 +21,17 @@ defmodule UnLib.Entries do
     |> Repo.insert!()
   end
 
+  @doc """
+  Lists all entries in the database.
+  """
   @spec list :: [Entry.t()]
   def list do
     Repo.all(Entry)
   end
 
+  @doc """
+  Lists all entries from a specific source or account.
+  """
   @spec list(Source.t()) :: [Entry.t()]
   def list(%Source{} = source) do
     Entry
@@ -45,14 +54,19 @@ defmodule UnLib.Entries do
     |> Repo.all()
   end
 
-  @spec list_unread(Source.t()) :: [Entry.t()]
-  @spec list_unread(Account.t()) :: [Entry.t()]
+  @doc """
+  Lists all unread entries from a specific source or account.
+  """
+  @spec list_unread(Account.t() | Source.t()) :: [Entry.t()]
   def list_unread(source_or_account) do
     source_or_account
     |> list()
     |> Enum.reject(& &1.read?)
   end
 
+  @doc """
+  Gets an entry by ID.
+  """
   @spec get(Ecto.UUID.t()) :: {:ok, Entry.t()} | {:error, any()}
   def get(id) do
     case Repo.get(Entry, id) do
@@ -61,6 +75,9 @@ defmodule UnLib.Entries do
     end
   end
 
+  @doc """
+  Gets an entry by URL.
+  """
   @spec get_by_url(String.t()) :: {:ok, Entry.t()} | {:error, any()}
   def get_by_url(url) do
     Entry
@@ -72,6 +89,9 @@ defmodule UnLib.Entries do
     end
   end
 
+  @doc """
+  Marks an entry as read.
+  """
   @spec read(Entry.t()) :: {:ok, Entry.t()} | {:error, any()}
   def read(%Entry{read?: false} = entry) do
     Repo.transaction(fn ->
@@ -99,6 +119,9 @@ defmodule UnLib.Entries do
     |> Repo.insert()
   end
 
+  @doc """
+  Marks all entries from a source or in an account as read.
+  """
   @spec read_all(Source.t() | Account.t()) :: :ok
   def read_all(source_or_account) do
     source_or_account
@@ -106,6 +129,9 @@ defmodule UnLib.Entries do
     |> Enum.each(&read/1)
   end
 
+  @doc """
+  Marks an entry as unread.
+  """
   @spec unread(Entry.t()) :: {:ok, Entry.t()} | {:error, any()}
   def unread(entry) do
     Repo.transaction(fn ->
@@ -130,6 +156,9 @@ defmodule UnLib.Entries do
     |> Repo.delete()
   end
 
+  @doc """
+  Marks all entries from a source or in an account as unread.
+  """
   @spec unread_all(Source.t() | Account.t()) :: :ok
   def unread_all(source_or_account) do
     source_or_account
@@ -138,6 +167,10 @@ defmodule UnLib.Entries do
     |> Enum.each(&unread/1)
   end
 
+  @doc """
+  Deletes an entry from the database.
+  Accepts either an ID or an entry.
+  """
   @spec delete(Ecto.UUID.t()) :: :ok
   def delete(id) when is_binary(id) do
     Entry
@@ -152,6 +185,9 @@ defmodule UnLib.Entries do
     delete(id)
   end
 
+  @doc """
+  Deletes all entries from an account or a source.
+  """
   @spec delete_all(Source.t()) :: :ok
   def delete_all(%Source{id: id}) do
     Entry
@@ -167,6 +203,9 @@ defmodule UnLib.Entries do
     :ok
   end
 
+  @doc """
+  Deletes all read entries from an account or source.
+  """
   @spec prune(Source.t()) :: :ok
   def prune(%Source{id: id}) do
     Entry

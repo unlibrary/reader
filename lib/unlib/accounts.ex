@@ -10,6 +10,9 @@ defmodule UnLib.Accounts do
           email: String.t()
         ]
 
+  @doc """
+  Creates a new user account.
+  """
   @spec create(String.t(), String.t(), create_opts()) ::
           {:ok, Account.t()} | {:error, any()}
   def create(username, password, opts \\ []) do
@@ -32,6 +35,14 @@ defmodule UnLib.Accounts do
     error
   end
 
+  @doc """
+  Authorizes an user.
+
+  This function doesn't do anything on its own. It just checks if the
+  login credentials are correct, and if the user exists etc.
+
+  This is used in the Reader Daemon.
+  """
   @spec login(String.t(), String.t()) ::
           {:ok, Account.t()} | {:error, :no_user_found | :invalid_password}
   def login(username, password) do
@@ -58,6 +69,9 @@ defmodule UnLib.Accounts do
     Auth.verify_pass(password, salt, hash_db)
   end
 
+  @doc """
+  Get user by ID.
+  """
   @spec get(Ecto.UUID.t()) ::
           {:ok, Account.t()} | {:error, :not_found}
   def get(id) do
@@ -66,6 +80,9 @@ defmodule UnLib.Accounts do
     |> handle_repo_response()
   end
 
+  @doc """
+  Get user by username.
+  """
   @spec get_by_username(String.t()) ::
           {:ok, Account.t()} | {:error, :not_found}
   def get_by_username(username) do
@@ -81,6 +98,9 @@ defmodule UnLib.Accounts do
     end
   end
 
+  @doc """
+  Update an user account.
+  """
   @spec update(Account.t(), String.t() | atom(), any()) ::
           {:ok, Account.t()} | {:error, any()}
   def update(%Account{} = user, key, value) do

@@ -105,10 +105,14 @@ defmodule UnLib.Feeds do
     entries =
       data.entries
       |> Enum.take(@amount_of_entries_to_save)
-      |> Enum.reduce([], &remove_duplicates/2)
+      |> remove_duplicates()
       |> Enum.reject(&already_read_or_saved?/1)
 
     %Data{data | entries: entries}
+  end
+
+  def filter(data) do
+    %Data{data | entries: []}
   end
 
   # This function filters out multiple entries with the same
@@ -117,11 +121,13 @@ defmodule UnLib.Feeds do
   #
   # Currently, we keep the first entry, and all later entries with
   # the same URL are discarded.
-  def remove_duplicates(parsed_entry, acc) do
-    case List.keyfind(acc, :url, parsed_entry[:url]) do
-      nil -> [parsed_entry | acc]
-      _ -> acc
-    end
+
+  defp remove_duplicates(parsed_entries) do
+    parsed_entries
+    |> Enum.reduce(%{}, fn parsed_entry, acc ->
+      Map.put(acc, parsed_entry.url, parsed_entry)
+    end)
+    |> Map.values()
   end
 
   @spec already_read_or_saved?(ParsedEntry.t()) :: boolean()
