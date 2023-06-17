@@ -6,7 +6,7 @@ defmodule UnLib.Source do
 
   - RSS (`:rss`)
   - Atom (`:atom`)
-  - Microformats2 (`:mf2`)
+  - Microformats2 (`:mf2`) - Coming Soon™
 
   But support for certain federated/indieweb protocols like microsub is planned and on the roadmap for 2022.
   """

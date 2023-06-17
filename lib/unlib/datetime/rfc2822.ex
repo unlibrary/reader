@@ -1,6 +1,6 @@
 defmodule UnLib.DateTime.RFC2822 do
   @moduledoc """
-  Parses RFC822 datetimes into `NaiveDateTime`.
+  Parses RFC2822 datetimes into `NaiveDateTime`.
 
   Copyright Lau Taarnskov. I stole this from the Calendar library, I'm not smart enough to write this mess ;)
 

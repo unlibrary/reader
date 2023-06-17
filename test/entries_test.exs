@@ -17,9 +17,10 @@ defmodule EntriesTest do
       url: "https://blog.geheimesite.nl/post/smartphones-in-de-klas/"
     }
 
-    %ParsedEntry{date: date, title: title, body: body, url: url} = ParsedEntry.from(rss_entry)
+    %ParsedEntry{datetime: datetime, title: title, body: body, url: url} =
+      ParsedEntry.from(rss_entry)
 
-    assert date == rss_entry.updated
+    assert datetime == rss_entry.updated
     assert title == rss_entry.title
     assert body == rss_entry.description
     assert url == rss_entry.url

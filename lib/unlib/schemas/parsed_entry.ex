@@ -1,6 +1,6 @@
 defmodule UnLib.ParsedEntry do
   @moduledoc """
-  Map representing a parsed RSS entry.
+  Struct representing a parsed RSS entry.
   """
 
   alias UnLib.{Repo, Source, Entry, ReadEntry, ParsedEntry}
@@ -8,10 +8,10 @@ defmodule UnLib.ParsedEntry do
 
   import Ecto.Query
 
-  defstruct [:date, :title, :body, :url]
+  defstruct [:datetime, :title, :body, :url]
 
   @type t() :: %ParsedEntry{
-          date: DateTime.rfc822(),
+          datetime: DateTime.rfc2822() | DateTime.rfc3339(),
           title: String.t(),
           body: String.t(),
           url: String.t()
@@ -29,7 +29,7 @@ defmodule UnLib.ParsedEntry do
   @spec from(rss_entry()) :: t()
   def from(rss_entry) do
     %ParsedEntry{
-      date: rss_entry[:published] || rss_entry[:updated],
+      datetime: rss_entry[:published] || rss_entry[:updated],
       title: rss_entry[:title],
       body: rss_entry[:content] || rss_entry[:description],
       url: rss_entry[:url]
@@ -38,8 +38,13 @@ defmodule UnLib.ParsedEntry do
 
   @spec save(Source.t(), t()) :: Entry.t()
   def save(source, entry) do
-    date = DateTime.from_rfc822(entry.date)
-    Entries.new(source, date, entry.title, entry.body, entry.url)
+    datetime =
+      case DateTime.detect_format(entry.datetime) do
+        :rfc2822 -> DateTime.from_rfc2822(entry.datetime)
+        :rfc3339 -> DateTime.from_rfc3339(entry.datetime)
+      end
+
+    Entries.new(source, datetime, entry.title, entry.body, entry.url)
   end
 
   @spec already_saved?(t()) :: boolean()
