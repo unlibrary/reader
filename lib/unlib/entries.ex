@@ -73,7 +73,7 @@ defmodule UnLib.Entries do
   end
 
   @spec read(Entry.t()) :: {:ok, Entry.t()} | {:error, any()}
-  def read(entry) do
+  def read(%Entry{read?: false} = entry) do
     Repo.transaction(fn ->
       with {:ok, entry} <- mark_entry_as_read(entry),
            {:ok, _read_entry} <- add_entry_to_read_entries(entry) do
@@ -82,6 +82,10 @@ defmodule UnLib.Entries do
         {:error, error} -> Repo.rollback(error)
       end
     end)
+  end
+
+  def read(entry) do
+    {:ok, entry}
   end
 
   defp mark_entry_as_read(entry) do
