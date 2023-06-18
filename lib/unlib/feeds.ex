@@ -125,7 +125,7 @@ defmodule UnLib.Feeds do
 
       %Data{data | entries: entries}
     catch
-      :exit, _ ->
+      _, _ ->
         %Data{data | error: "parsing feed failed for #{data.source.name} due to malformed XML"}
     end
   end
