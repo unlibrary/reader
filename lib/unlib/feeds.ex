@@ -25,8 +25,10 @@ defmodule UnLib.Feeds do
       sources
       |> Enum.map(&Task.async(fn ->
         pre_pull_hook().(&1)
-        pull(&1)
+        response = pull(&1)
         post_pull_hook().(&1)
+
+        response
       end))
       |> Task.await_many(:infinity)
     else
