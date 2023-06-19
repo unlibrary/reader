@@ -7,8 +7,6 @@ defmodule SourcesTest do
   alias UnLib.{Account, Source}
   alias UnLib.{Accounts, Sources}
 
-  @amount_of_entries_to_save 20
-
   test "new/3 returns source struct" do
     {:ok, %Source{}} = Sources.new(valid_feed_url(), :rss)
   end

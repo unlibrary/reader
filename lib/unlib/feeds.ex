@@ -23,13 +23,15 @@ defmodule UnLib.Feeds do
   defp pull_sources(sources) do
     if pull_in_async?() do
       sources
-      |> Enum.map(&Task.async(fn ->
-        pre_pull_hook().(&1)
-        response = pull(&1)
-        post_pull_hook().(&1)
+      |> Enum.map(
+        &Task.async(fn ->
+          pre_pull_hook().(&1)
+          response = pull(&1)
+          post_pull_hook().(&1)
 
-        response
-      end))
+          response
+        end)
+      )
       |> Task.await_many(:infinity)
     else
       Enum.map(sources, fn source ->
@@ -45,11 +47,11 @@ defmodule UnLib.Feeds do
   end
 
   defp pre_pull_hook do
-    Application.get_env(:unlib, :pre_pull_hook, &(&1))
+    Application.get_env(:unlib, :pre_pull_hook, & &1)
   end
 
   defp post_pull_hook do
-    Application.get_env(:unlib, :post_pull_hook, &(&1))
+    Application.get_env(:unlib, :post_pull_hook, & &1)
   end
 
   @doc """

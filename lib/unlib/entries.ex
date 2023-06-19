@@ -33,12 +33,9 @@ defmodule UnLib.Entries do
   Lists all entries from a specific source or account.
   """
   @spec list(Source.t()) :: [Entry.t()]
-  def list(%Source{} = source) do
-    Entry
-    |> where(source_id: ^source.id)
-    |> order_by([e], desc: e.date)
+  def list(%Source{id: source_id}) do
+    list_source_query(source_id)
     |> Repo.all()
-    |> Repo.preload(:source)
   end
 
   @spec list(Account.t()) :: [Entry.t()]
@@ -47,21 +44,43 @@ defmodule UnLib.Entries do
   end
 
   def list(%Account{sources: sources}) do
+    list_account_query(sources)
+    |> Repo.all()
+  end
+
+  defp list_source_query(source_id) do
+    Entry
+    |> where(source_id: ^source_id)
+    |> order_by([e], desc: e.date)
+    |> preload(:source)
+  end
+
+  defp list_account_query(sources) do
     sources
     |> Ecto.assoc(:entries)
     |> order_by([e], desc: e.date)
     |> preload(:source)
-    |> Repo.all()
   end
 
   @doc """
   Lists all unread entries from a specific source or account.
   """
-  @spec list_unread(Account.t() | Source.t()) :: [Entry.t()]
-  def list_unread(source_or_account) do
-    source_or_account
-    |> list()
-    |> Enum.reject(& &1.read?)
+  @spec list_unread(Source.t()) :: [Entry.t()]
+  def list_unread(%Source{id: source_id}) do
+    list_source_query(source_id)
+    |> where([e], e.read? == false)
+    |> Repo.all()
+  end
+
+  @spec list_unread(Account.t()) :: [Entry.t()]
+  def list_unread(%Account{sources: []}) do
+    []
+  end
+
+  def list_unread(%Account{sources: sources}) do
+    list_account_query(sources)
+    |> where([e], e.read? == false)
+    |> Repo.all()
   end
 
   @doc """
